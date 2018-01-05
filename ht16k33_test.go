@@ -1,0 +1,17 @@
+package drivers
+
+import (
+	"github.com/reef-pi/rpi/i2c"
+	"testing"
+)
+
+func TestHT16K33(t *testing.T) {
+	bus := i2c.MockBus()
+	h := NewHT16K33(bus)
+	if err := h.Setup(); err != nil {
+		t.Fatal(err)
+	}
+	if err := h.Display("REEF"); err != nil {
+		t.Fatal(err)
+	}
+}
