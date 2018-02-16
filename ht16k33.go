@@ -73,10 +73,23 @@ func (h *HT16K33) Setup() error {
 	if err := h.bus.WriteToReg(h.addr, REGISTER_SYSTEM_SETUP|0x01, []byte{0x00}); err != nil {
 		return err
 	}
-	if err := h.bus.WriteToReg(h.addr, REGISTER_DIMMING|5, []byte{0x00}); err != nil {
+	if err := h.bus.WriteToReg(h.addr, REGISTER_DIMMING|0, []byte{0x00}); err != nil {
 		return err
 	}
+	if err := h.bus.WriteToReg(h.addr, REGISTER_DISPLAY_SETUP|0x01|(BLINKRATE_OFF<<1), []byte{0x00}); err != nil {
+		return err
+	}
+	if bytes, err := h.bus.ReadBytes(h.addr, 16); err != nil {
+		return err
+	} else {
+		h.buffer = bytes
+	}
+
 	return h.bus.WriteToReg(h.addr, 0x00, h.buffer)
+}
+
+func (h *HT16K33) Blink() error {
+	return h.bus.WriteToReg(h.addr, REGISTER_DISPLAY_SETUP|0x01|(BLINKRATE_HALFHZ<<1), []byte{0x00})
 }
 
 func (h *HT16K33) Display(word string) error {
