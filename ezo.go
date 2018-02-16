@@ -1,5 +1,9 @@
 package drivers
 
+/*
+https://www.atlas-scientific.com/_files/_datasheets/_circuit/pH_EZO_datasheet.pdf
+*/
+
 import (
 	"github.com/reef-pi/rpi/i2c"
 )
