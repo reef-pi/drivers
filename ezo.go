@@ -3,6 +3,7 @@ package drivers
 import (
 	"fmt"
 	"github.com/reef-pi/rpi/i2c"
+	"strconv"
 	"time"
 )
 
@@ -37,6 +38,17 @@ func (a *AtlasEZO) command(payload []byte) error {
 	}
 	time.Sleep(EZO_PAUSE_TIME)
 	return nil
+}
+
+func (a *AtlasEZO) read() (string, error) {
+	payload, err := a.bus.ReadBytes(a.addr, 31)
+	if err != nil {
+		return "", err
+	}
+	if payload[0] != byte('1') {
+		return "", fmt.Errorf("Failed to execute. Error:%s", string(payload))
+	}
+	return string(payload[1:]), nil
 }
 
 func (a *AtlasEZO) Baud() error {
@@ -102,6 +114,7 @@ func (a *AtlasEZO) ChangeI2CAddress() error {
 func (a *AtlasEZO) SetLed(e EZO_STATE) error {
 	return a.command([]byte{byte(e)})
 }
+
 func (a *AtlasEZO) GetLed() error {
 	return a.command([]byte("?"))
 }
@@ -110,8 +123,15 @@ func (a *AtlasEZO) ProtocolLock() error {
 	return nil
 }
 
-func (a *AtlasEZO) Read() error {
-	return a.command([]byte("R"))
+func (a *AtlasEZO) Read() (float64, error) {
+	if err := a.command([]byte("R")); err != nil {
+		return 0, err
+	}
+	v, err := a.read()
+	if err != nil {
+		return 0, err
+	}
+	return strconv.ParseFloat(v, 64)
 }
 
 func (a *AtlasEZO) Sleep() error {
