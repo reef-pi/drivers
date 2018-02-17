@@ -51,8 +51,8 @@ func (a *AtlasEZO) read() (string, error) {
 	return string(payload[1:]), nil
 }
 
-func (a *AtlasEZO) Baud() error {
-	return nil
+func (a *AtlasEZO) Baud(n int) error {
+	return a.command([]byte(fmt.Sprintf("Baud,%f", n)))
 }
 
 func (a *AtlasEZO) CalibrateMid(n float32) error {
@@ -96,7 +96,7 @@ func (a *AtlasEZO) Import() error {
 }
 
 func (a *AtlasEZO) Factory() error {
-	return nil
+	return a.command([]byte("Factory"))
 }
 
 func (a *AtlasEZO) Find() error {
@@ -135,7 +135,7 @@ func (a *AtlasEZO) Read() (float64, error) {
 }
 
 func (a *AtlasEZO) Sleep() error {
-	return nil
+	return a.command([]byte("Sleep"))
 }
 
 func (a *AtlasEZO) Slope() error {
