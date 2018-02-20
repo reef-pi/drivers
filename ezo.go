@@ -32,8 +32,8 @@ func NewAtlasEZO(addr byte, bus i2c.Bus) *AtlasEZO {
 	}
 }
 
-func (a *AtlasEZO) command(payload []byte) error {
-	if err := a.bus.WriteBytes(a.addr, payload); err != nil {
+func (a *AtlasEZO) command(cmd string) error {
+	if err := a.bus.WriteBytes(a.addr, []byte(cmd+"\000")); err != nil {
 		return err
 	}
 	time.Sleep(EZO_PAUSE_TIME)
@@ -45,18 +45,21 @@ func (a *AtlasEZO) read() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if payload[0] != byte('1') {
-		return "", fmt.Errorf("Failed to execute. Error:%s", string(payload))
+	fmt.Println(payload)
+	fmt.Println(payload[0])
+	fmt.Println(string(payload[1:]))
+	if payload[0] != byte(1) {
+		//	return "", fmt.Errorf("Failed to execute. Error:%s", string(payload))
 	}
 	return string(payload[1:]), nil
 }
 
 func (a *AtlasEZO) Baud(n int) error {
-	return a.command([]byte(fmt.Sprintf("Baud,%f", n)))
+	return a.command(fmt.Sprintf("Baud,%f", n))
 }
 
 func (a *AtlasEZO) CalibrateMid(n float32) error {
-	if err := a.command([]byte(fmt.Sprintf("Cal,mid,%f", n))); err != nil {
+	if err := a.command(fmt.Sprintf("Cal,mid,%f", n)); err != nil {
 		return err
 	}
 	time.Sleep(600 * time.Millisecond)
@@ -64,7 +67,7 @@ func (a *AtlasEZO) CalibrateMid(n float32) error {
 }
 
 func (a *AtlasEZO) CalibrateHigh(n float32) error {
-	if err := a.command([]byte(fmt.Sprintf("Cal,high,%f", n))); err != nil {
+	if err := a.command(fmt.Sprintf("Cal,high,%f", n)); err != nil {
 		return err
 	}
 	time.Sleep(600 * time.Millisecond)
@@ -72,7 +75,7 @@ func (a *AtlasEZO) CalibrateHigh(n float32) error {
 }
 
 func (a *AtlasEZO) CalibrateLow(n float32) error {
-	if err := a.command([]byte(fmt.Sprintf("Cal,low,%f", n))); err != nil {
+	if err := a.command(fmt.Sprintf("Cal,low,%f", n)); err != nil {
 		return err
 	}
 	time.Sleep(600 * time.Millisecond)
@@ -80,11 +83,11 @@ func (a *AtlasEZO) CalibrateLow(n float32) error {
 }
 
 func (a *AtlasEZO) ClearCalibration() error {
-	return a.command([]byte("Cal,clear"))
+	return a.command("Cal,clear")
 }
 
 func (a *AtlasEZO) IsCalibrated() error {
-	return a.command([]byte("Cal,?"))
+	return a.command("Cal,?")
 }
 
 func (a *AtlasEZO) Export() error {
@@ -96,15 +99,15 @@ func (a *AtlasEZO) Import() error {
 }
 
 func (a *AtlasEZO) Factory() error {
-	return a.command([]byte("Factory"))
+	return a.command("Factory")
 }
 
 func (a *AtlasEZO) Find() error {
-	return a.command([]byte("Find"))
+	return a.command("Find")
 }
 
 func (a *AtlasEZO) Information() error {
-	return a.command([]byte("i"))
+	return a.command("i")
 }
 
 func (a *AtlasEZO) ChangeI2CAddress() error {
@@ -112,11 +115,11 @@ func (a *AtlasEZO) ChangeI2CAddress() error {
 }
 
 func (a *AtlasEZO) SetLed(e EZO_STATE) error {
-	return a.command([]byte{byte(e)})
+	return a.command(string([]byte{byte(e)}))
 }
 
 func (a *AtlasEZO) GetLed() error {
-	return a.command([]byte("?"))
+	return a.command("L,?")
 }
 
 func (a *AtlasEZO) ProtocolLock() error {
@@ -124,7 +127,7 @@ func (a *AtlasEZO) ProtocolLock() error {
 }
 
 func (a *AtlasEZO) Read() (float64, error) {
-	if err := a.command([]byte("R")); err != nil {
+	if err := a.command("R"); err != nil {
 		return 0, err
 	}
 	v, err := a.read()
@@ -135,7 +138,7 @@ func (a *AtlasEZO) Read() (float64, error) {
 }
 
 func (a *AtlasEZO) Sleep() error {
-	return a.command([]byte("Sleep"))
+	return a.command("Sleep")
 }
 
 func (a *AtlasEZO) Slope() error {
@@ -143,7 +146,7 @@ func (a *AtlasEZO) Slope() error {
 }
 
 func (a *AtlasEZO) Status() error {
-	return a.command([]byte("Status"))
+	return a.command("Status")
 }
 
 func (a *AtlasEZO) TemperatureCompensate() error {
