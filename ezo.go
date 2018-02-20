@@ -128,14 +128,6 @@ func (a *AtlasEZO) IsCalibrated() (int, error) {
 	return a.extractIntResponse()
 }
 
-func (a *AtlasEZO) Export() error {
-	return nil
-}
-
-func (a *AtlasEZO) Import() error {
-	return nil
-}
-
 func (a *AtlasEZO) Factory() error {
 	return a.command("Factory")
 }
@@ -172,10 +164,6 @@ func (a *AtlasEZO) Read() (float64, error) {
 
 func (a *AtlasEZO) Sleep() error {
 	return a.command("Sleep")
-}
-
-func (a *AtlasEZO) Slope() error {
-	return nil
 }
 
 func (a *AtlasEZO) Status() (string, string, error) {
