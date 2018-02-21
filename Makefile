@@ -11,3 +11,4 @@ build:
 .PHONY: go-get
 go-get:
 	go get -u github.com/reef-pi/rpi/i2c
+	go get -u github.com/sigurn/crc8
