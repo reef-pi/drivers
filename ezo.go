@@ -2,10 +2,11 @@ package drivers
 
 import (
 	"fmt"
-	"github.com/reef-pi/rpi/i2c"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/reef-pi/rpi/i2c"
 )
 
 /*
@@ -90,7 +91,7 @@ func (a *AtlasEZO) LedState() (bool, error) {
 }
 
 func (a *AtlasEZO) Baud(n int) error {
-	return a.command(fmt.Sprintf("Baud,%f", n))
+	return a.command(fmt.Sprintf("Baud,%d", n))
 }
 
 func (a *AtlasEZO) CalibrateMid(n float32) error {

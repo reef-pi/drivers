@@ -1,8 +1,9 @@
 package drivers
 
 import (
-	"github.com/reef-pi/rpi/i2c"
 	"math"
+
+	"github.com/reef-pi/rpi/i2c"
 )
 
 const (

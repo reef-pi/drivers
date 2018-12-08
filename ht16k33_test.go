@@ -1,8 +1,9 @@
 package drivers
 
 import (
-	"github.com/reef-pi/rpi/i2c"
 	"testing"
+
+	"github.com/reef-pi/rpi/i2c"
 )
 
 func TestHT16K33(t *testing.T) {

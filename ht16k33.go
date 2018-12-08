@@ -2,6 +2,7 @@ package drivers
 
 import (
 	"fmt"
+
 	"github.com/reef-pi/rpi/i2c"
 )
 
