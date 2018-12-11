@@ -38,7 +38,7 @@ var DefaultPCA9685Config = PCA9685Config{
 	Frequency: 1500,
 }
 
-func NewPCA9685(config PCA9685Config, bus i2c.Bus) (driver.Driver, error) {
+func New(config PCA9685Config, bus i2c.Bus) (driver.Driver, error) {
 
 	hwDriver := drivers.NewPCA9685(byte(config.Address), bus)
 	pwm := pca9685Driver{

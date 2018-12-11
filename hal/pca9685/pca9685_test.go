@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewPCA9685(t *testing.T) {
-	driver, err := NewPCA9685(DefaultPCA9685Config, i2c.MockBus())
+	driver, err := New(DefaultPCA9685Config, i2c.MockBus())
 	if err != nil {
 		t.Errorf("unexpected error making driver %v", err)
 	}
@@ -44,7 +44,7 @@ func TestNewPCA9685(t *testing.T) {
 }
 
 func TestPca9685Channel_Set(t *testing.T) {
-	driver, err := NewPCA9685(DefaultPCA9685Config, i2c.MockBus())
+	driver, err := New(DefaultPCA9685Config, i2c.MockBus())
 	if err != nil {
 		t.Errorf("unexpected error making driver %v", err)
 	}
@@ -72,7 +72,7 @@ func TestPca9685Channel_Set(t *testing.T) {
 }
 
 func TestPca9685Driver_Close(t *testing.T) {
-	driver, err := NewPCA9685(DefaultPCA9685Config, i2c.MockBus())
+	driver, err := New(DefaultPCA9685Config, i2c.MockBus())
 	if err != nil {
 		t.Errorf("unexpected error making driver %v", err)
 	}
