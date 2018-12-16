@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/reef-pi/drivers"
 	"github.com/reef-pi/hal"
 	"github.com/reef-pi/rpi/i2c"
 )
@@ -64,18 +65,18 @@ func (p *pca9685Driver) Close() error {
 	return p.hwDriver.Close()
 }
 
-func (p *pca9685Driver) Metadata() driver.Metadata {
-	return driver.Metadata{
+func (p *pca9685Driver) Metadata() hal.Metadata {
+	return hal.Metadata{
 		Name:        "pca9685",
 		Description: "Supports one PCA9685 chip",
-		Capabilities: driver.Capabilities{
+		Capabilities: hal.Capabilities{
 			PWM: true,
 		},
 	}
 }
 
-func (p *pca9685Driver) PWMChannels() []driver.PWMChannel {
-	var chs []driver.PWMChannel
+func (p *pca9685Driver) PWMChannels() []hal.Channel {
+	var chs []hal.Channel
 	for _, ch := range p.channels {
 		chs = append(chs, ch)
 	}
@@ -83,7 +84,7 @@ func (p *pca9685Driver) PWMChannels() []driver.PWMChannel {
 	return chs
 }
 
-func (p *pca9685Driver) GetPWMChannel(name string) (driver.PWMChannel, error) {
+func (p *pca9685Driver) GetPWMChannel(name string) (hal.Channel, error) {
 	chnum, err := strconv.ParseInt(name, 10, 64)
 	if err != nil {
 		return nil, err
