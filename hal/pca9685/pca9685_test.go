@@ -3,8 +3,8 @@ package pca9685
 import (
 	"testing"
 
+	"github.com/reef-pi/hal"
 	"github.com/reef-pi/rpi/i2c"
-	driverif "github.com/reef-pi/types/driver"
 )
 
 func TestNewPCA9685(t *testing.T) {
@@ -21,7 +21,7 @@ func TestNewPCA9685(t *testing.T) {
 		t.Error("driver didn't indicate it supports PWM")
 	}
 
-	pwmDriver, ok := driver.(driverif.PWM)
+	pwmDriver, ok := driver.(hal.PWM)
 	if !ok {
 		t.Error("driver is not a PWM interface")
 	}
@@ -29,12 +29,12 @@ func TestNewPCA9685(t *testing.T) {
 		t.Error("driver is nil")
 	}
 
-	channels := pwmDriver.PWMChannels()
+	channels := pwmDriver.Channels()
 	if l := len(channels); l != 16 {
 		t.Errorf("expected 16 channels, got %d", l)
 	}
 
-	channel15, err := pwmDriver.GetPWMChannel("15")
+	channel15, err := pwmDriver.GetChannel("15")
 	if err != nil {
 		t.Errorf("error fetching channel 15 %v", err)
 	}
@@ -49,8 +49,8 @@ func TestPca9685Channel_Set(t *testing.T) {
 		t.Errorf("unexpected error making driver %v", err)
 	}
 
-	pwmDriver := driver.(driverif.PWM)
-	channel15, err := pwmDriver.GetPWMChannel("15")
+	pwmDriver := driver.(hal.PWM)
+	channel15, err := pwmDriver.GetChannel("15")
 	if err != nil {
 		t.Errorf("error fetching channel 15 %v", err)
 	}
