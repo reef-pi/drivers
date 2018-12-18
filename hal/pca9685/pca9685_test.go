@@ -21,7 +21,7 @@ func TestNewPCA9685(t *testing.T) {
 		t.Error("driver didn't indicate it supports PWM")
 	}
 
-	pwmDriver, ok := driver.(hal.PWM)
+	pwmDriver, ok := driver.(hal.PWMDriver)
 	if !ok {
 		t.Error("driver is not a PWM interface")
 	}
@@ -29,12 +29,12 @@ func TestNewPCA9685(t *testing.T) {
 		t.Error("driver is nil")
 	}
 
-	channels := pwmDriver.Channels()
+	channels := pwmDriver.PWMChannels()
 	if l := len(channels); l != 16 {
 		t.Errorf("expected 16 channels, got %d", l)
 	}
 
-	channel15, err := pwmDriver.GetChannel("15")
+	channel15, err := pwmDriver.PWMChannel("15")
 	if err != nil {
 		t.Errorf("error fetching channel 15 %v", err)
 	}
@@ -49,8 +49,8 @@ func TestPca9685Channel_Set(t *testing.T) {
 		t.Errorf("unexpected error making driver %v", err)
 	}
 
-	pwmDriver := driver.(hal.PWM)
-	channel15, err := pwmDriver.GetChannel("15")
+	pwmDriver := driver.(hal.PWMDriver)
+	channel15, err := pwmDriver.PWMChannel("15")
 	if err != nil {
 		t.Errorf("error fetching channel 15 %v", err)
 	}
