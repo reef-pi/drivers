@@ -75,8 +75,8 @@ func (p *pca9685Driver) Metadata() hal.Metadata {
 	}
 }
 
-func (p *pca9685Driver) Channels() []hal.Channel {
-	var chs []hal.Channel
+func (p *pca9685Driver) PWMChannels() []hal.PWMChannel {
+	var chs []hal.PWMChannel
 	for _, ch := range p.channels {
 		chs = append(chs, ch)
 	}
@@ -84,7 +84,7 @@ func (p *pca9685Driver) Channels() []hal.Channel {
 	return chs
 }
 
-func (p *pca9685Driver) GetChannel(name string) (hal.Channel, error) {
+func (p *pca9685Driver) PWMChannel(name string) (hal.PWMChannel, error) {
 	chnum, err := strconv.ParseInt(name, 10, 64)
 	if err != nil {
 		return nil, err
