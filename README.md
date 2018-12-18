@@ -1,7 +1,7 @@
 # drivers
 
 Drivers for various ancillary hardware used in reef-pi, based on
-[reef-pi/rpi](https://github.com/reef-pi/rpi)
+[reef-pi/hal](https://github.com/reef-pi/hal)
 
 [![Build Status](https://travis-ci.org/reef-pi/drivers.png?branch=master)](https://travis-ci.org/reef-pi/drivers)
 [![Coverage Status](https://codecov.io/gh/reef-pi/drivers/branch/master/graph/badge.svg)](https://codecov.io/gh/reef-pi/drivers)
