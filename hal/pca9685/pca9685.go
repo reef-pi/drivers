@@ -89,7 +89,7 @@ func (p *pca9685Driver) PWMChannel(name string) (hal.PWMChannel, error) {
 	if err != nil {
 		return nil, err
 	}
-	if chnum < 0 || int(chnum) > len(p.channels) {
+	if chnum < 0 || int(chnum) >= len(p.channels) {
 		return nil, fmt.Errorf("invalid channel numer %s", name)
 	}
 	return p.channels[chnum], nil
