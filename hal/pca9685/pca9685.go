@@ -69,8 +69,8 @@ func (p *pca9685Driver) Metadata() hal.Metadata {
 	return hal.Metadata{
 		Name:        "pca9685",
 		Description: "Supports one PCA9685 chip",
-		Capabilities: hal.Capabilities{
-			PWM: true,
+		Capabilities: []hal.Capability{
+			hal.PWM,
 		},
 	}
 }
