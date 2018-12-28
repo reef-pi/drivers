@@ -17,8 +17,10 @@ func TestNewPCA9685(t *testing.T) {
 	if meta.Name != "pca9685" {
 		t.Errorf("name %s did not match pca9685", meta.Name)
 	}
-	if !meta.Capabilities.PWM {
-		t.Error("driver didn't indicate it supports PWM")
+	for _, cap := range meta.Capabilities {
+		if cap != hal.PWM {
+			t.Error("driver didn't indicate it supports PWM")
+		}
 	}
 
 	pwmDriver, ok := driver.(hal.PWMDriver)
