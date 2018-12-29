@@ -1,9 +1,9 @@
 package ph_board
 
 import (
+	"bytes"
 	"encoding/binary"
 	"github.com/reef-pi/rpi/i2c"
-	"math"
 )
 
 const chName = "0"
@@ -21,10 +21,13 @@ func (c *channel) Read() (float64, error) {
 	if err := c.bus.WriteBytes(c.addr, []byte{0x10}); err != nil {
 		return -1, err
 	}
-	buf, err := c.bus.ReadBytes(c.addr, 2)
-	if err != nil {
+	buf := make([]byte, 2)
+	if err := c.bus.ReadFromReg(c.addr, 0x0, buf); err != nil {
 		return -1, err
 	}
-	bits := binary.LittleEndian.Uint16(buf)
-	return math.Float64frombits(uint64(bits)), nil
+	var v int16
+	if err := binary.Read(bytes.NewReader(buf), binary.LittleEndian, &v); err != nil {
+		return -1, err
+	}
+	return float64(v), nil
 }
