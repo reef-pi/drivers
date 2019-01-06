@@ -36,7 +36,7 @@ func TestNewPCA9685(t *testing.T) {
 		t.Errorf("expected 16 channels, got %d", l)
 	}
 
-	channel15, err := pwmDriver.PWMChannel("15")
+	channel15, err := pwmDriver.PWMChannel(15)
 	if err != nil {
 		t.Errorf("error fetching channel 15 %v", err)
 	}
@@ -52,7 +52,7 @@ func TestPca9685Channel_Set(t *testing.T) {
 	}
 
 	pwmDriver := driver.(hal.PWMDriver)
-	channel15, err := pwmDriver.PWMChannel("15")
+	channel15, err := pwmDriver.PWMChannel(15)
 	if err != nil {
 		t.Errorf("error fetching channel 15 %v", err)
 	}
