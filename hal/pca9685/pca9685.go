@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"sort"
-	"strconv"
 	"sync"
 
 	"github.com/reef-pi/drivers"
@@ -13,18 +12,38 @@ import (
 )
 
 type PCA9685Config struct {
-	Address   int  `json:"address"` // 0x40
-	DevMode   bool `json:"dev_mode"`
-	Frequency int  `json:"frequency"`
+	Address   int `json:"address"` // 0x40
+	Frequency int `json:"frequency"`
 }
 
 type pca9685Channel struct {
 	driver  *pca9685Driver
 	channel int
+	v       float64
 }
 
-func (c *pca9685Channel) Name() string            { return fmt.Sprintf("%d", c.channel) }
-func (c *pca9685Channel) Set(value float64) error { return c.driver.set(c.channel, value) }
+func (c *pca9685Channel) Name() string { return fmt.Sprintf("%d", c.channel) }
+func (c *pca9685Channel) Close() error { return nil }
+func (c *pca9685Channel) Set(value float64) error {
+	if err := c.driver.set(c.channel, value); err != nil {
+		return err
+	}
+	c.v = value
+	return nil
+}
+func (c *pca9685Channel) Write(b bool) error {
+	var v float64
+	if b {
+		v = 100
+	}
+	if err := c.driver.set(c.channel, v); err != nil {
+		return err
+	}
+	c.v = v
+	return nil
+}
+
+func (c *pca9685Channel) LastState() bool { return c.v == 100 }
 
 type pca9685Driver struct {
 	config   PCA9685Config
@@ -84,15 +103,22 @@ func (p *pca9685Driver) PWMChannels() []hal.PWMChannel {
 	return chs
 }
 
-func (p *pca9685Driver) PWMChannel(name string) (hal.PWMChannel, error) {
-	chnum, err := strconv.ParseInt(name, 10, 64)
-	if err != nil {
-		return nil, err
-	}
-	if chnum < 0 || int(chnum) >= len(p.channels) {
-		return nil, fmt.Errorf("invalid channel numer %s", name)
+func (p *pca9685Driver) PWMChannel(chnum int) (hal.PWMChannel, error) {
+	if chnum < 0 || chnum >= len(p.channels) {
+		return nil, fmt.Errorf("invalid channel %d", chnum)
 	}
 	return p.channels[chnum], nil
+}
+func (p *pca9685Driver) OutputPins() []hal.OutputPin {
+	pins := make([]hal.OutputPin, len(p.channels))
+	for i, ch := range p.channels {
+		pins[i] = ch
+	}
+	return pins
+}
+
+func (p *pca9685Driver) OutputPin(n int) (hal.OutputPin, error) {
+	return p.PWMChannel(n)
 }
 
 // value should be within 0-100
