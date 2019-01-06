@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"sort"
-	"strconv"
 	"sync"
 
 	"github.com/reef-pi/drivers"
@@ -104,13 +103,9 @@ func (p *pca9685Driver) PWMChannels() []hal.PWMChannel {
 	return chs
 }
 
-func (p *pca9685Driver) PWMChannel(name string) (hal.PWMChannel, error) {
-	chnum, err := strconv.ParseInt(name, 10, 64)
-	if err != nil {
-		return nil, err
-	}
-	if chnum < 0 || int(chnum) >= len(p.channels) {
-		return nil, fmt.Errorf("invalid channel numer %s", name)
+func (p *pca9685Driver) PWMChannel(chnum int) (hal.PWMChannel, error) {
+	if chnum < 0 || chnum >= len(p.channels) {
+		return nil, fmt.Errorf("invalid channel %d", chnum)
 	}
 	return p.channels[chnum], nil
 }
@@ -122,8 +117,8 @@ func (p *pca9685Driver) OutputPins() []hal.OutputPin {
 	return pins
 }
 
-func (p *pca9685Driver) OutputPin(name string) (hal.OutputPin, error) {
-	return p.PWMChannel(name)
+func (p *pca9685Driver) OutputPin(n int) (hal.OutputPin, error) {
+	return p.PWMChannel(n)
 }
 
 // value should be within 0-100

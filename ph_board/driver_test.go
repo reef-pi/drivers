@@ -9,7 +9,7 @@ import (
 
 func demo() {
 	d, _ := HalAdapter([]byte(`{"address":43}`), i2c.MockBus())
-	ch, _ := d.ADCChannel("0")
+	ch, _ := d.ADCChannel(0)
 	v, _ := ch.Read()
 	fmt.Println(v)
 }
@@ -43,11 +43,11 @@ func TestPhBoardDriver(t *testing.T) {
 	if len(d.ADCChannels()) != 1 {
 		t.Error("Expected only one channel")
 	}
-	if _, err := d.ADCChannel("1"); err == nil {
+	if _, err := d.ADCChannel(1); err == nil {
 		t.Error("Expected error for invalid channel name")
 	}
 
-	ch, err := d.ADCChannel("0")
+	ch, err := d.ADCChannel(0)
 	if err != nil {
 		t.Error(err)
 	}

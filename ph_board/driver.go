@@ -51,9 +51,9 @@ func (d *driver) ADCChannels() []hal.ADCChannel {
 	return d.channels
 }
 
-func (d *driver) ADCChannel(n string) (hal.ADCChannel, error) {
-	if n != chName {
-		return nil, fmt.Errorf("ph board has only a signle channel named %s", chName)
+func (d *driver) ADCChannel(n int) (hal.ADCChannel, error) {
+	if n != 0 {
+		return nil, fmt.Errorf("ph board does not have channel %d", n)
 	}
 	return d.channels[0], nil
 }
