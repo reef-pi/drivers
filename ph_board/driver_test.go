@@ -8,7 +8,7 @@ import (
 )
 
 func demo() {
-	d, _ := HalAdapter([]byte(`{"address":43}`), i2c.MockBus())
+	d, _ := NewDriver([]byte(`{"address":43}`), i2c.MockBus())
 	ch, _ := d.ADCChannel(0)
 	v, _ := ch.Read()
 	fmt.Println(v)
@@ -26,7 +26,7 @@ func TestPhBoardDriver(t *testing.T) {
 		"address":16
 	}
 	`
-	d, err := HalAdapter([]byte(configJSON), bus)
+	d, err := NewDriver([]byte(configJSON), bus)
 	if err != nil {
 		t.Error(err)
 	}
