@@ -18,7 +18,10 @@ type driver struct {
 	meta     hal.Metadata
 }
 
-func HalAdapter(c []byte, bus i2c.Bus) (hal.ADCDriver, error) {
+func HalAdapter(c []byte, bus i2c.Bus) (hal.Driver, error) {
+	return NewDriver(c, bus)
+}
+func NewDriver(c []byte, bus i2c.Bus) (hal.ADCDriver, error) {
 	var config Config
 	if err := json.Unmarshal(c, &config); err != nil {
 		return nil, err
