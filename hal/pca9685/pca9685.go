@@ -70,6 +70,8 @@ func New(config PCA9685Config, bus i2c.Bus) (hal.Driver, error) {
 		config.Frequency = 1500
 	}
 	hwDriver.Freq = config.Frequency // overriding default
+	
+	// Create the 16 channels the hardware has
 	for i := 0; i < 16; i++ {
 		ch := &pca9685Channel{
 			channel: i,
@@ -77,11 +79,18 @@ func New(config PCA9685Config, bus i2c.Bus) (hal.Driver, error) {
 		}
 		pwm.channels = append(pwm.channels, ch)
 	}
+	
+	// Wake the hardware
 	return &pwm, hwDriver.Wake()
 }
 
 func (p *pca9685Driver) Close() error {
-	return p.hwDriver.Close()
+	// Close the driver (will clear all registers)
+	if err := p.hwDriver.Close(); err != nil {
+		return err
+	}
+	// Send the hardware to sleep
+	return p.hwDriver.Sleep()
 }
 
 func (p *pca9685Driver) Metadata() hal.Metadata {
@@ -95,6 +104,7 @@ func (p *pca9685Driver) Metadata() hal.Metadata {
 }
 
 func (p *pca9685Driver) PWMChannels() []hal.PWMChannel {
+	// Return array of channels soreted by name
 	var chs []hal.PWMChannel
 	for _, ch := range p.channels {
 		chs = append(chs, ch)
@@ -104,6 +114,7 @@ func (p *pca9685Driver) PWMChannels() []hal.PWMChannel {
 }
 
 func (p *pca9685Driver) PWMChannel(chnum int) (hal.PWMChannel, error) {
+	// Return given channel
 	if chnum < 0 || chnum >= len(p.channels) {
 		return nil, fmt.Errorf("invalid channel %d", chnum)
 	}
@@ -128,6 +139,7 @@ func (p *pca9685Driver) set(pin int, value float64) error {
 	}
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	// The 40.96 here should probably be 40.95, see driver for details 
 	off := int(value * 40.96)
 	return p.hwDriver.SetPwm(pin, 0, off)
 }
