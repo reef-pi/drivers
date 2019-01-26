@@ -110,7 +110,7 @@ func (p *PCA9685) SetPwm(channel, onTime, offTime int) error {
 	
 	// If offTime == 0, we want to be full off. Set LEDx_OFF_H(4)
 	if offTime == 0 {
-		onTime = 4096
+		offTime = 4096
 	}
 	
 	// If offTime == 4095, we want to be full on. Set LEDx_ON_H(4)
