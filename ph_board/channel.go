@@ -45,8 +45,8 @@ func (c *channel) Read() (float64, error) {
 	if err := c.bus.WriteBytes(c.addr, []byte{0x10}); err != nil {
 		return -1, err
 	}
-	buf := make([]byte, 2)
-	if err := c.bus.ReadFromReg(c.addr, 0x0, buf); err != nil {
+	buf, err := c.bus.ReadBytes(c.addr, 2)
+	if err != nil {
 		return -1, err
 	}
 	var v int16
