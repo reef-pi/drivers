@@ -33,9 +33,9 @@ func NewDriver(c []byte, bus i2c.Bus) (hal.ADCDriver, error) {
 		return nil, err
 	}
 
-	ch := &channel{
-		bus:  bus,
-		addr: config.Address,
+	ch, err := NewChannel(bus, config.Address)
+	if err != nil {
+		return nil, err
 	}
 	return &driver{
 		channels: []hal.ADCChannel{ch},

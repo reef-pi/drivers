@@ -1,6 +1,6 @@
 .PHONY: test
 test:
-	go test -cover -race ./...
+	go test -coverprofile=coverage.txt -race ./...
 
 .PHONY:build
 build:
