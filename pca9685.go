@@ -3,6 +3,7 @@ package drivers
 import (
 	"math"
 	"time"
+	"log"
 
 	"github.com/reef-pi/rpi/i2c"
 )
@@ -92,30 +93,31 @@ func (p *PCA9685) Wake() error {
 	return p.bus.WriteToReg(p.addr, mode1RegAddr, []byte{mode1Reg})
 }
 
-func (p *PCA9685) SetPwm(channel, onTime, offTime int) error {
-	// At this pont onTime and offTime are alreeady scaled to 0 .. 4096 by the HAL.
+func (p *PCA9685) SetPwm(channel int, onTime, offTime uint16) error {
+	log.Println("onTime ", onTime, " offTime ", offTime)
+	// At this pont onTime and offTime are alreeady scaled to 0 .. 4095 by the HAL.
 	// The PCA9685 has two special states, full on and full off, besides the normal PWM.
 	// Using them prevents the microspikes that can cause extra heat generation in mosfet
 	// output stages as well as switching noise.
 	// Generally, if onTime + 1 == offTime, we're dealing with full on. If onTime == offTome, 
 	// it's full off.
-	// Since onTime is 0 and always be 0, and offTime will vary between 0 .. 4096, which is
-	// one step out of range, we can use that as an indicator.
-	// 100 * 40.96 will result in 4096. This triggers a potential issue because LEDx_OFF_H(4)
-	// Is the full off flag bit, making 4096 (0x1000) result in full off!
-	// Because of that, we need to clamp it here
+	// Since onTime is 0 and always be 0, and offTime will vary between 0 .. 4095
+	// , we can use that as an indicator.
+	// 100 * 40.95 will result in 4095. Sanity check it anyway.
 	if offTime >= 4095 {
-		offTime = 4095;
+		offTime = 4095
 	} 
 	
 	// If offTime == 0, we want to be full off. Set LEDx_OFF_H(4)
 	if offTime == 0 {
 		offTime = 4096
+		onTime = 0
 	}
 	
 	// If offTime == 4095, we want to be full on. Set LEDx_ON_H(4)
 	if offTime == 4095 {
 		onTime = 4096
+		offTime = 0
 	} 
 
 	// Split the ints into 4 bytes	
@@ -125,8 +127,12 @@ func (p *PCA9685) SetPwm(channel, onTime, offTime int) error {
 	offTimeLow := byte(offTime & 0xFF)
 	offTimeHigh := byte(offTime >> 8)
 	
+	log.Println("onLow ", onTimeLow, " onHigh ", onTimeHigh, " offLow ", offTimeLow, " offHigh ", offTimeHigh)
 	// Send one entire channel in one go
-	return p.bus.WriteToReg(p.addr, timeReg, []byte{onTimeLow, onTimeHigh, offTimeLow, offTimeHigh})
+	if err := p.bus.WriteToReg(p.addr, timeReg, []byte{onTimeLow, onTimeHigh}); err != nil {
+		return err
+	}
+	return p.bus.WriteToReg(p.addr, timeReg + 2, []byte{offTimeLow, offTimeHigh})
 }
 
 func (p *PCA9685) Close() error {

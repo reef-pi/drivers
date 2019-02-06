@@ -139,7 +139,6 @@ func (p *pca9685Driver) set(pin int, value float64) error {
 	}
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	// The 40.96 here should probably be 40.95, see driver for details 
-	off := int(value * 40.96)
+	off := uint16(value * 40.95)
 	return p.hwDriver.SetPwm(pin, 0, off)
 }
