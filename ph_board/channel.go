@@ -1,8 +1,6 @@
 package ph_board
 
 import (
-	"bytes"
-	"encoding/binary"
 	"fmt"
 	"github.com/reef-pi/hal"
 	"github.com/reef-pi/rpi/i2c"
