@@ -1,8 +1,6 @@
 package ph_board
 
 import (
-	"bytes"
-	"encoding/binary"
 	"fmt"
 	"github.com/reef-pi/hal"
 	"github.com/reef-pi/rpi/i2c"
@@ -42,17 +40,11 @@ func (c *channel) Calibrate(points []hal.Measurement) error {
 }
 
 func (c *channel) Read() (float64, error) {
-	if err := c.bus.WriteBytes(c.addr, []byte{0x10}); err != nil {
-		return -1, err
-	}
 	buf := make([]byte, 2)
-	if err := c.bus.ReadFromReg(c.addr, 0x0, buf); err != nil {
+	if err := c.bus.ReadFromReg(c.addr, 0x10, buf); err != nil {
 		return -1, err
 	}
-	var v int16
-	if err := binary.Read(bytes.NewReader(buf), binary.LittleEndian, &v); err != nil {
-		return -1, err
-	}
+	v := int16(buf[0])<<8 | int16(buf[1])
 	return float64(v), nil
 }
 
