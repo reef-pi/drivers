@@ -41,7 +41,7 @@ func (c *channel) Calibrate(points []hal.Measurement) error {
 
 func (c *channel) Read() (float64, error) {
 	buf := make([]byte, 2)
-	if err := c.bus.ReadFromReg(c.addr, 0x10, buf); err != nil {
+	if err := c.bus.ReadFromReg(c.addr, 0x0, buf); err != nil {
 		return -1, err
 	}
 	v := int16(buf[0])<<8 | int16(buf[1])
