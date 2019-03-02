@@ -70,7 +70,7 @@ func New(config PCA9685Config, bus i2c.Bus) (hal.Driver, error) {
 		config.Frequency = 1500
 	}
 	hwDriver.Freq = config.Frequency // overriding default
-	
+
 	// Create the 16 channels the hardware has
 	for i := 0; i < 16; i++ {
 		ch := &pca9685Channel{
@@ -79,7 +79,7 @@ func New(config PCA9685Config, bus i2c.Bus) (hal.Driver, error) {
 		}
 		pwm.channels = append(pwm.channels, ch)
 	}
-	
+
 	// Wake the hardware
 	return &pwm, hwDriver.Wake()
 }
@@ -139,6 +139,6 @@ func (p *pca9685Driver) set(pin int, value float64) error {
 	}
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	off := uint16(value * 40.95)
+	off := int(value * 40.95)
 	return p.hwDriver.SetPwm(pin, 0, off)
 }
