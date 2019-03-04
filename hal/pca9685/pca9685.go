@@ -139,8 +139,8 @@ func (p *pca9685Driver) set(pin int, value float64) error {
 	}
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	on := 0
-	off := int(value * 40.95)
+	on := uint16(0)
+	off := uint16(value * 40.95)
 	if value == 100 {
 		//Special case for 100% on.  LEDn_ON_H bit 4 will turn on 100%
 		on = 4096
