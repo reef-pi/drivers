@@ -1,6 +1,7 @@
 package drivers
 
 import (
+	"github.com/reef-pi/hal"
 	"testing"
 
 	"github.com/reef-pi/rpi/i2c"
@@ -51,4 +52,44 @@ func TestEZO(t *testing.T) {
 		t.Error("Expected version 2.8. Found:", i)
 	}
 
+}
+
+func TestEZOHalAdapter(t *testing.T) {
+	bus := i2c.MockBus()
+	_, err := EzoHalAdapter([]byte(""), bus)
+	if err == nil {
+		t.Error("Adapter creation should fail when json config is invalid")
+	}
+	configJSON := `
+	{
+		"address":16
+	}
+	`
+	d, err := EzoHalAdapter([]byte(configJSON), bus)
+	if err != nil {
+		t.Error(err)
+	}
+	if d.Metadata().Name != _ezoName {
+		t.Error("Unexpected name")
+	}
+	if !d.Metadata().HasCapability(hal.PH) {
+		t.Error("PH Capability should exist")
+	}
+	if d.Metadata().HasCapability(hal.Input) {
+		t.Error("Input Capability should not exist")
+	}
+
+	if len(d.ADCChannels()) != 1 {
+		t.Error("Expected only one channel")
+	}
+	if _, err := d.ADCChannel(1); err == nil {
+		t.Error("Expected error for invalid channel name")
+	}
+
+	if _, err := d.ADCChannel(0); err != nil {
+		t.Error(err)
+	}
+	if err := d.Close(); err != nil {
+		t.Error(err)
+	}
 }
