@@ -65,9 +65,13 @@ func TestEZOHalAdapter(t *testing.T) {
 		"address":16
 	}
 	`
-	d, err := EzoHalAdapter([]byte(configJSON), bus)
+	e, err := EzoHalAdapter([]byte(configJSON), bus)
 	if err != nil {
 		t.Error(err)
+	}
+	d, ok := e.(hal.ADCDriver)
+	if !ok {
+		t.Error("Failed to type cast ezo driver to ADC driver")
 	}
 	if d.Metadata().Name != _ezoName {
 		t.Error("Unexpected name")

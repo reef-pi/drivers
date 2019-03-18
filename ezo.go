@@ -256,7 +256,7 @@ type EzoConfig struct {
 	Address byte `json:"address"`
 }
 
-func EzoHalAdapter(conf []byte, b i2c.Bus) (hal.ADCDriver, error) {
+func EzoHalAdapter(conf []byte, b i2c.Bus) (hal.Driver, error) {
 	var config EzoConfig
 	if err := json.Unmarshal(conf, &config); err != nil {
 		return nil, err
