@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/reef-pi/hal"
 	"github.com/reef-pi/rpi/i2c"
+	"math"
 )
 
 const chName = "0"
@@ -40,9 +41,12 @@ func (c *channel) Calibrate(points []hal.Measurement) error {
 }
 
 func (c *channel) Read() (float64, error) {
-	buf := make([]byte, 2)
-	if err := c.bus.ReadFromReg(c.addr, 0x10, buf); err != nil {
-		return -1, err
+	if err := c.bus.WriteBytes(c.addr, []byte{0x10}); err != nil {
+		return math.NaN(), err
+	}
+	buf, err := c.bus.ReadBytes(c.addr, 2)
+	if err != nil {
+		return math.NaN(), err
 	}
 	v := int16(buf[0])<<8 | int16(buf[1])
 	return float64(v), nil

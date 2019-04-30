@@ -29,6 +29,9 @@ func NewDriver(c []byte, bus i2c.Bus) (hal.ADCDriver, error) {
 	if err := bus.WriteBytes(config.Address, []byte{0x06}); err != nil {
 		return nil, err
 	}
+	if err := bus.WriteBytes(config.Address, []byte{0x40, 0x06}); err != nil {
+		return nil, err
+	}
 	if err := bus.WriteBytes(config.Address, []byte{0x08}); err != nil {
 		return nil, err
 	}
