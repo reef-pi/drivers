@@ -22,7 +22,7 @@ are not stable, and subjected to change as per reef-pi's requirement.
 - LED Display: HT16k33
 - pH probe: Atlas scientific ezo ph circuit
 - ph_board: ADS1115 based pH circuits
-- pico_ph: ATSAMD10 pH adapter for the blueAcro Pico board
+- pico-board: ATSAMD10 pH adapter for the blueAcro Pico board
 
 ## License
 
