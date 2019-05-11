@@ -11,15 +11,18 @@ Drivers for various ancillary hardware used in reef-pi, based on
 
 ## Introduction
 
-This repository contains a set of drivers for ancillay hardware  used in [reef-pi](http://reef-pi.com) project. They are intended to
-have minimal dependencies (most cases only reef-pi/rpi). These drivers API are not stable, and subjected to change as per reef-pi's
-requirement.
+This repository contains a set of drivers for ancillay hardware used
+in [reef-pi](http://reef-pi.com) project. They are intended to have
+minimal dependencies (most cases only reef-pi/rpi). These drivers API
+are not stable, and subjected to change as per reef-pi's requirement.
 
 ## Currently available drivers
 
 - PWM: PCA9685
 - LED Display: HT16k33
 - pH probe: Atlas scientific ezo ph circuit
+- ph_board: ADS1115 based pH circuits
+- pico-board: ATSAMD10 pH adapter for the blueAcro Pico board
 
 ## License
 
