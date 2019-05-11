@@ -1,4 +1,4 @@
-package pico_ph
+package pico_board
 
 import (
 	"fmt"

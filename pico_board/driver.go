@@ -1,4 +1,4 @@
-package pico_ph
+package pico_board
 
 import (
 	"encoding/json"
@@ -8,7 +8,11 @@ import (
 	"github.com/reef-pi/rpi/i2c"
 )
 
-const driverName = "ph-board"
+var driverMeta =  hal.Metadata{
+	Name:         "pico-board",
+	Description:  "Isolated ATSAMD10 pH driver on the blueAcro Pico board",
+	Capabilities: []hal.Capability{hal.PH},
+}
 
 type Config struct {
 	Address byte `json:"address"`
@@ -34,11 +38,7 @@ func NewDriver(c []byte, bus i2c.Bus) (hal.ADCDriver, error) {
 	}
 	return &driver{
 		channels: []hal.ADCChannel{ch},
-		meta: hal.Metadata{
-			Name:         "pico-ph",
-			Description:  "Isolated ATSAMD10 pH driver on the blueAcro Pico board",
-			Capabilities: []hal.Capability{hal.PH},
-		},
+		meta: driverMeta,
 	}, nil
 }
 func (d *driver) Metadata() hal.Metadata {

@@ -1,19 +1,11 @@
-package pico_ph
+package pico_board
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/reef-pi/hal"
 	"github.com/reef-pi/rpi/i2c"
 )
-
-func demo() {
-	d, _ := NewDriver([]byte(`{"address":43}`), i2c.MockBus())
-	ch, _ := d.ADCChannel(0)
-	v, _ := ch.Read()
-	fmt.Println(v)
-}
 
 func TestPhBoardDriver(t *testing.T) {
 	bus := i2c.MockBus()
@@ -31,7 +23,7 @@ func TestPhBoardDriver(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if d.Metadata().Name != "pico-ph" {
+	if d.Metadata().Name != "pico-board" {
 		t.Error("Unexpected name")
 	}
 	if !d.Metadata().HasCapability(hal.PH) {
