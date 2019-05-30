@@ -6,7 +6,6 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/reef-pi/drivers"
 	"github.com/reef-pi/hal"
 	"github.com/reef-pi/rpi/i2c"
 )
@@ -47,7 +46,7 @@ func (c *pca9685Channel) LastState() bool { return c.v == 100 }
 
 type pca9685Driver struct {
 	config   PCA9685Config
-	hwDriver *drivers.PCA9685
+	hwDriver *PCA9685
 	mu       *sync.Mutex
 	channels []*pca9685Channel
 }
@@ -57,9 +56,9 @@ var DefaultPCA9685Config = PCA9685Config{
 	Frequency: 1500,
 }
 
-func New(config PCA9685Config, bus i2c.Bus) (hal.Driver, error) {
+func HALAdpater(config PCA9685Config, bus i2c.Bus) (hal.Driver, error) {
 
-	hwDriver := drivers.NewPCA9685(byte(config.Address), bus)
+	hwDriver := New(byte(config.Address), bus)
 	pwm := pca9685Driver{
 		config:   config,
 		mu:       &sync.Mutex{},
@@ -139,16 +138,5 @@ func (p *pca9685Driver) set(pin int, value float64) error {
 	}
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	on := uint16(0)
-	off := uint16(value * 40.95)
-	if value == 100 {
-		//Special case for 100% on.  LEDn_ON_H bit 4 will turn on 100%
-		on = 4096
-		off = 0
-	} else if value == 0 {
-		//Special case for 0%.  LEDn_OFF_H bit 4 will turn completely off.
-		off = 4096
-	}
-
-	return p.hwDriver.SetPwm(pin, on, off)
+	return p.hwDriver.SetPwm(pin, 0, uint16(value*4095))
 }
