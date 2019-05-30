@@ -7,8 +7,10 @@ import (
 	"github.com/reef-pi/rpi/i2c"
 )
 
+var conf = []byte(`{"address":66, "frequency":200}`)
+
 func TestHALAdapter(t *testing.T) {
-	driver, err := HALAdpater(DefaultPCA9685Config, i2c.MockBus())
+	driver, err := HALAdpater(conf, i2c.MockBus())
 	if err != nil {
 		t.Errorf("unexpected error making driver %v", err)
 	}
@@ -46,7 +48,7 @@ func TestHALAdapter(t *testing.T) {
 }
 
 func TestPca9685Channel_Set(t *testing.T) {
-	driver, err := HALAdpater(DefaultPCA9685Config, i2c.MockBus())
+	driver, err := HALAdpater(conf, i2c.MockBus())
 	if err != nil {
 		t.Errorf("unexpected error making driver %v", err)
 	}
@@ -74,7 +76,7 @@ func TestPca9685Channel_Set(t *testing.T) {
 }
 
 func TestPca9685Driver_Close(t *testing.T) {
-	driver, err := HALAdpater(DefaultPCA9685Config, i2c.MockBus())
+	driver, err := HALAdpater(conf, i2c.MockBus())
 	if err != nil {
 		t.Errorf("unexpected error making driver %v", err)
 	}

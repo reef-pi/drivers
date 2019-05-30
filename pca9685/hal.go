@@ -1,6 +1,7 @@
 package pca9685
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"sort"
@@ -56,7 +57,11 @@ var DefaultPCA9685Config = PCA9685Config{
 	Frequency: 1500,
 }
 
-func HALAdpater(config PCA9685Config, bus i2c.Bus) (hal.Driver, error) {
+func HALAdpater(c []byte, bus i2c.Bus) (hal.Driver, error) {
+	var config PCA9685Config
+	if err := json.Unmarshal(c, &config); err != nil {
+		return nil, err
+	}
 
 	hwDriver := New(byte(config.Address), bus)
 	pwm := pca9685Driver{
