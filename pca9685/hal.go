@@ -143,5 +143,5 @@ func (p *pca9685Driver) set(pin int, value float64) error {
 	}
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	return p.hwDriver.SetPwm(pin, 0, uint16(value*4095))
+	return p.hwDriver.SetPwm(pin, 0, uint16(value*40.95))
 }
