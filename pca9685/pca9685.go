@@ -37,7 +37,7 @@ func (p *PCA9685) i2cRead(reg byte, payload []byte) error {
 
 func (p *PCA9685) mode1Reg() (byte, error) {
 	mode1Reg := make([]byte, 1)
-	return mode1Reg[0], p.i2cRead(mode1RegAddr, mode1Reg)
+	return mode1Reg[0], p.bus.WriteToReg(p.addr, mode1RegAddr, mode1Reg)
 }
 
 // Set the sleep flag on the PCA. This will shut down the oscillators.
