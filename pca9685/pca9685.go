@@ -31,11 +31,6 @@ func New(addr byte, bus i2c.Bus) *PCA9685 {
 	}
 }
 
-// Commented because it's not currently used
-//func (p *PCA9685) i2cWrite(reg byte, payload []byte) error {
-//	return p.bus.WriteToReg(p.addr, reg, payload)
-//}
-
 func (p *PCA9685) i2cRead(reg byte, payload []byte) error {
 	return p.bus.ReadFromReg(p.addr, reg, payload)
 }
@@ -110,7 +105,7 @@ func (p *PCA9685) SetPwm(channel int, onTime, offTime uint16) error {
 
 	// If offTime == 0, we want to be full off. Set LEDx_OFF_H(4)
 	if offTime == 0 {
-		onTime = 4096 // check with onTimne 0 and off time 4096
+		onTime = 4095 // check with onTimne 0 and off time 4096
 	}
 
 	// If offTime == 4095, we want to be full on. Set LEDx_ON_H(4)
