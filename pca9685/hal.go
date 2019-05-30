@@ -57,7 +57,7 @@ var DefaultPCA9685Config = PCA9685Config{
 	Frequency: 1500,
 }
 
-func HALAdpater(c []byte, bus i2c.Bus) (hal.Driver, error) {
+func HALAdapater(c []byte, bus i2c.Bus) (hal.Driver, error) {
 	config := DefaultPCA9685Config
 	if err := json.Unmarshal(c, &config); err != nil {
 		return nil, err
