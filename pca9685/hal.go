@@ -58,7 +58,7 @@ var DefaultPCA9685Config = PCA9685Config{
 }
 
 func HALAdpater(c []byte, bus i2c.Bus) (hal.Driver, error) {
-	var config PCA9685Config
+	config := DefaultPCA9685Config
 	if err := json.Unmarshal(c, &config); err != nil {
 		return nil, err
 	}
