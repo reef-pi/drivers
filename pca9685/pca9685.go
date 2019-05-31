@@ -47,11 +47,11 @@ func (p *PCA9685) Sleep() error {
 }
 
 func (p *PCA9685) Wake() error {
-	if err := p.Sleep(); err != nil {
-		return err
-	}
 	mode1Reg, err := p.mode1Reg()
 	if err != nil {
+		return err
+	}
+	if err := p.Sleep(); err != nil {
 		return err
 	}
 	if p.Freq == 0 {
