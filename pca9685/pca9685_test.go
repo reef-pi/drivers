@@ -1,4 +1,4 @@
-package drivers
+package pca9685
 
 import (
 	"testing"
@@ -6,9 +6,9 @@ import (
 	"github.com/reef-pi/rpi/i2c"
 )
 
-func TestPCA9685(t *testing.T) {
+func TestNew(t *testing.T) {
 	bus := i2c.MockBus()
-	p := NewPCA9685(0x70, bus)
+	p := New(0x70, bus)
 	if err := p.Wake(); err != nil {
 		t.Fatal(err)
 	}
