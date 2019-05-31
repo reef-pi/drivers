@@ -1,6 +1,7 @@
 package pca9685
 
 import (
+	"log"
 	"math"
 	"time"
 
@@ -79,7 +80,7 @@ func (p *PCA9685) Wake() error {
 }
 
 func (p *PCA9685) SetPwm(channel int, onTime, offTime uint16) error {
-	//log.Println("onTime ", onTime, " offTime ", offTime)
+	log.Println("onTime ", onTime, " offTime ", offTime)
 	if offTime > 4095 {
 		offTime = 4095
 	}
@@ -102,10 +103,16 @@ func (p *PCA9685) SetPwm(channel int, onTime, offTime uint16) error {
 	offTimeHigh := byte(offTime >> 8)
 
 	//log.Println("onLow ", onTimeLow, " onHigh ", onTimeHigh, " offLow ", offTimeLow, " offHigh ", offTimeHigh)
-	if err := p.bus.WriteToReg(p.addr, timeReg, []byte{onTimeLow, onTimeHigh}); err != nil {
+	if err := p.bus.WriteToReg(p.addr, timeReg, []byte{onTimeLow}); err != nil {
 		return err
 	}
-	return p.bus.WriteToReg(p.addr, timeReg+2, []byte{offTimeLow, offTimeHigh})
+	if err := p.bus.WriteToReg(p.addr, timeReg+1, []byte{onTimeHigh}); err != nil {
+		return err
+	}
+	if err := p.bus.WriteToReg(p.addr, timeReg+2, []byte{offTimeLow}); err != nil {
+		return err
+	}
+	return p.bus.WriteToReg(p.addr, timeReg+3, []byte{offTimeHigh})
 }
 
 func (p *PCA9685) Close() error {
