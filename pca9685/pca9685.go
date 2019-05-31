@@ -1,7 +1,6 @@
 package pca9685
 
 import (
-	"log"
 	"math"
 	"time"
 
@@ -31,10 +30,6 @@ func New(addr byte, bus i2c.Bus) *PCA9685 {
 	}
 }
 
-func (p *PCA9685) i2cRead(reg byte, payload []byte) error {
-	return p.bus.ReadFromReg(p.addr, reg, payload)
-}
-
 func (p *PCA9685) mode1Reg() (byte, error) {
 	mode1Reg := make([]byte, 1)
 	return mode1Reg[0], p.bus.WriteToReg(p.addr, mode1RegAddr, mode1Reg)
@@ -52,27 +47,12 @@ func (p *PCA9685) Sleep() error {
 }
 
 func (p *PCA9685) Wake() error {
-	// Read mode1 register
+	if err := p.Sleep(); err != nil {
+		return err
+	}
 	mode1Reg, err := p.mode1Reg()
 	if err != nil {
 		return err
-	}
-
-	if (mode1Reg & 0x80) != 0 {
-		// We are in sleep mode after a previous run without shutdown. Restore.
-		// First, clear sleep bit
-		mode1Reg &= (^byte(0x10))
-		p.bus.WriteToReg(p.addr, mode1RegAddr, []byte{mode1Reg})
-		// Allow oscillator to stabilize
-		time.Sleep(500 * time.Microsecond)
-		// Clear sleep bit
-		p.bus.WriteToReg(p.addr, mode1RegAddr, []byte{mode1Reg | 0x80})
-	} else if (mode1Reg & 0x10) != 0 {
-		// We are in normal sleep, do a normal wakeup
-		mode1Reg &= (^byte(0x10))
-		p.bus.WriteToReg(p.addr, mode1RegAddr, []byte{mode1Reg})
-		// Allow oscillator to stabilize
-		time.Sleep(500 * time.Microsecond)
 	}
 	if p.Freq == 0 {
 		p.Freq = defaultFreq
@@ -81,24 +61,25 @@ func (p *PCA9685) Wake() error {
 	if err := p.bus.WriteToReg(p.addr, preScaleRegAddr, []byte{preScaleValue}); err != nil {
 		return err
 	}
+	wakeMode := mode1Reg & 0xEF
+	if (mode1Reg & 0x80) == 0x80 {
+		if err := p.bus.WriteToReg(p.addr, mode1RegAddr, []byte{wakeMode}); err != nil {
+			return err
+		}
+		time.Sleep(500 * time.Microsecond)
+	}
 
-	// Set our operating modes:
-	mode1Reg = 0x20 // No AllCall, no subaddresses, no sleep, internal clock, enable auto increment
+	restartOpCode := wakeMode | 0x80
+	if err := p.bus.WriteToReg(p.addr, mode1RegAddr, []byte{restartOpCode}); err != nil {
+		return err
+	}
 
-	return p.bus.WriteToReg(p.addr, mode1RegAddr, []byte{mode1Reg})
+	newmode := ((mode1Reg | 0x01) & 0xDF)
+	return p.bus.WriteToReg(p.addr, mode1RegAddr, []byte{newmode})
 }
 
 func (p *PCA9685) SetPwm(channel int, onTime, offTime uint16) error {
-	log.Println("onTime ", onTime, " offTime ", offTime)
-	// At this pont onTime and offTime are alreeady scaled to 0 .. 4095 by the HAL.
-	// The PCA9685 has two special states, full on and full off, besides the normal PWM.
-	// Using them prevents the microspikes that can cause extra heat generation in mosfet
-	// output stages as well as switching noise.
-	// Generally, if onTime + 1 == offTime, we're dealing with full on. If onTime == offTime,
-	// it's full off.
-	// Since onTime is 0 and always be 0, and offTime will vary between 0 .. 4095
-	// , we can use that as an indicator.
-	// 100 * 40.95 will result in 4095. Sanity check it anyway.
+	//log.Println("onTime ", onTime, " offTime ", offTime)
 	if offTime > 4095 {
 		offTime = 4095
 	}
@@ -120,8 +101,7 @@ func (p *PCA9685) SetPwm(channel int, onTime, offTime uint16) error {
 	offTimeLow := byte(offTime & 0xFF)
 	offTimeHigh := byte(offTime >> 8)
 
-	log.Println("onLow ", onTimeLow, " onHigh ", onTimeHigh, " offLow ", offTimeLow, " offHigh ", offTimeHigh)
-	// Send one entire channel in one go
+	//log.Println("onLow ", onTimeLow, " onHigh ", onTimeHigh, " offLow ", offTimeLow, " offHigh ", offTimeHigh)
 	if err := p.bus.WriteToReg(p.addr, timeReg, []byte{onTimeLow, onTimeHigh}); err != nil {
 		return err
 	}
