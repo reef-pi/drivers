@@ -23,74 +23,13 @@ type (
 		Total    float64 `json:"total_wh,omitempty"`
 		ErrrCode int     `json:"err_code,omitempty"`
 	}
-	Outlet struct {
-		name      string
-		id        string
+	HS300Strip struct {
 		addr      string
-		state     bool
 		cnFactory ConnectionFactory
+		meta      hal.Metadata
+		children  []*Outlet
 	}
 )
-
-func (o *Outlet) Name() string {
-	return o.name
-}
-
-func (o *Outlet) Write(state bool) error {
-	if state {
-		return o.On()
-	}
-	return o.Off()
-}
-
-func (o *Outlet) RTEmeter() (*HS300Realtime, error) {
-	var cmd HS300EmeterCmd
-	cmd.Context.Children = []string{o.id}
-	d, err := command(o.cnFactory, o.addr, &cmd)
-	if err != nil {
-		return nil, err
-	}
-	if err := json.Unmarshal(d, &cmd); err != nil {
-		return nil, err
-	}
-	return &cmd.Emeter.Realtime, nil
-}
-
-func (o *Outlet) LastState() bool {
-	return o.state
-}
-
-func (o *Outlet) On() error {
-	cmd := new(CmdRelayState)
-	cmd.System.RelayState.State = 1
-	cmd.Context.Children = []string{o.id}
-	if _, err := command(o.cnFactory, o.addr, cmd); err != nil {
-		return err
-	}
-	o.state = true
-	return nil
-}
-func (o *Outlet) Off() error {
-	cmd := new(CmdRelayState)
-	cmd.System.RelayState.State = 0
-	cmd.Context.Children = []string{o.id}
-	if _, err := command(o.cnFactory, o.addr, cmd); err != nil {
-		return err
-	}
-	o.state = true
-	return nil
-}
-
-func (o *Outlet) Close() error {
-	return nil
-}
-
-type HS300Strip struct {
-	addr      string
-	cnFactory ConnectionFactory
-	meta      hal.Metadata
-	children  []*Outlet
-}
 
 func NewHS300Strip(addr string) *HS300Strip {
 	return &HS300Strip{
@@ -99,7 +38,7 @@ func NewHS300Strip(addr string) *HS300Strip {
 			Name:        "tplink-hs300",
 			Description: "tplink hs300 series smart power strip driver with current monitoring",
 			Capabilities: []hal.Capability{
-				hal.Output,
+				hal.Output, hal.PH,
 			},
 		},
 		cnFactory: TCPConnFactory,
@@ -112,7 +51,8 @@ func HS300HALAdapter(c []byte, _ i2c.Bus) (hal.Driver, error) {
 	if err := json.Unmarshal(c, &conf); err != nil {
 		return nil, err
 	}
-	return NewHS300Strip(conf.Address), nil
+	s := NewHS300Strip(conf.Address)
+	return s, s.FetchSysInfo()
 }
 
 func (s *HS300Strip) Metadata() hal.Metadata {
@@ -134,11 +74,6 @@ func (s *HS300Strip) OutputPins() []hal.OutputPin {
 func (s *HS300Strip) OutputPin(i int) (hal.OutputPin, error) {
 	if i < 0 || i > 5 {
 		return nil, fmt.Errorf("invalid pin: %d", i)
-	}
-	if s.children[i] == nil {
-		if err := s.FetchSysInfo(); err != nil {
-			return nil, err
-		}
 	}
 	return s.children[i], nil
 }
@@ -171,4 +106,19 @@ func (s *HS300Strip) FetchSysInfo() error {
 
 func (s *HS300Strip) Children() []*Outlet {
 	return s.children
+}
+
+func (p *HS300Strip) ADCChannels() []hal.ADCChannel {
+	var channels []hal.ADCChannel
+	for _, o := range p.children {
+		channels = append(channels, o)
+	}
+	return channels
+}
+
+func (p *HS300Strip) ADCChannel(i int) (hal.ADCChannel, error) {
+	if i < 0 || i > 5 {
+		return nil, fmt.Errorf("invalid channel number: %d", i)
+	}
+	return p.children[i], nil
 }
