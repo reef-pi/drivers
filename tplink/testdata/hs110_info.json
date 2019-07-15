@@ -1,0 +1,28 @@
+{
+  "system": {
+    "get_sysinfo": {
+      "alias": "M1 plug",
+      "model": "HS110(US)",
+      "dev_name": "Wi-Fi Smart Plug With Energy Monitoring",
+      "err_code": 0,
+      "latitude": 37.419332,
+      "longitude": -122.103005,
+      "rssi": -80,
+      "on_time": 1295,
+      "relay_state": 1,
+      "sw_ver": "1.2.5 Build 171206 Rel.085954",
+      "hw_ver": "1.0",
+      "deviceId": "8006507B788FC78FA602B1AA168F5AE41881D870",
+      "oemId": "FFF22CFF774A0B89F7624BFC6F50D5DE",
+      "hwId": "60FF6B258734EA6880E186F8C96DDC61",
+      "mac": "50:C7:BF:7C:E4:D3",
+      "icon_hash": "",
+      "active_mode": "none",
+      "feature": "TIM:ENE",
+      "updating": 0,
+      "led_off": 0,
+      "fwId": "00000000000000000000000000000000",
+      "type": "IOT.SMARTPLUGSWITCH"
+    }
+  }
+}
