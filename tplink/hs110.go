@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/reef-pi/hal"
+	"github.com/reef-pi/rpi/i2c"
 )
 
 type (
@@ -42,6 +43,14 @@ func NewHS110Plug(addr string) *HS110Plug {
 		},
 		calibrator: cal,
 	}
+}
+
+func HS110HALAdapter(c []byte, _ i2c.Bus) (hal.Driver, error) {
+	var conf Config
+	if err := json.Unmarshal(c, &conf); err != nil {
+		return nil, err
+	}
+	return NewHS110Plug(conf.Address), nil
 }
 
 func (p *HS110Plug) RTEmeter() (*Realtime, error) {
