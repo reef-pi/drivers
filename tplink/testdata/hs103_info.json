@@ -1,0 +1,30 @@
+{
+  "system": {
+    "get_sysinfo": {
+      "alias": "Ryans room",
+      "model": "HS103(US)",
+      "dev_name": "Smart Wi-Fi Plug Lite",
+      "err_code": 0,
+      "longitude_i": -1221030,
+      "latitude_i": 374193,
+      "rssi": -59,
+      "on_time": 164593,
+      "relay_state": 1,
+      "sw_ver": "1.0.12 Build 190403 Rel.074805",
+      "hw_ver": "2.1",
+      "deviceId": "800667E66825732643F044237F4235F21B2456D3",
+      "oemId": "24B27E003E98D053CF8B51CE8086FDA8",
+      "hwId": "18967AEED1C89BED1BBC7F62FD06468A",
+      "mac": "D8:0D:17:D3:31:0A",
+      "icon_hash": "",
+      "active_mode": "none",
+      "feature": "TIM",
+      "updating": 0,
+      "led_off": 0,
+      "mic_type": "IOT.SMARTPLUGSWITCH",
+      "next_action": {
+        "type": -1
+      }
+    }
+  }
+}

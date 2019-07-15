@@ -1,0 +1,79 @@
+{
+  "system": {
+    "get_sysinfo": {
+      "alias": "TP-LINK_Power Strip_D9DE",
+      "model": "HS300(US)",
+      "err_code": 0,
+      "latitude_i": 374193,
+      "longitude_i": -1221030,
+      "rssi": -59,
+      "sw_ver": "1.0.10 Build 190103 Rel.163517",
+      "hw_ver": "1.0",
+      "deviceId": "80061BBA3099A90D40E5A655F4041C7D1B2AEB46",
+      "oemId": "5C9E6254BEBAED63B2B6102966D24C17",
+      "hwId": "34C41AA028022D0CCEA5E678E8547C54",
+      "mic_type": "IOT.SMARTPLUGSWITCH",
+      "feature": "TIM:ENE",
+      "mac": "D8:0D:17:E7:D9:DE",
+      "updating": 0,
+      "led_off": 0,
+      "children": [
+        {
+          "id": "80061BBA3099A90D40E5A655F4041C7D1B2AEB4600",
+          "state": 1,
+          "alias": "Plug 1",
+          "on_time": 1348,
+          "next_action": {
+            "type": -1
+          }
+        },
+        {
+          "id": "80061BBA3099A90D40E5A655F4041C7D1B2AEB4601",
+          "state": 1,
+          "alias": "Plug 2",
+          "on_time": 1348,
+          "next_action": {
+            "type": -1
+          }
+        },
+        {
+          "id": "80061BBA3099A90D40E5A655F4041C7D1B2AEB4602",
+          "state": 1,
+          "alias": "Plug 3",
+          "on_time": 1348,
+          "next_action": {
+            "type": -1
+          }
+        },
+        {
+          "id": "80061BBA3099A90D40E5A655F4041C7D1B2AEB4603",
+          "state": 1,
+          "alias": "Plug 4",
+          "on_time": 1348,
+          "next_action": {
+            "type": -1
+          }
+        },
+        {
+          "id": "80061BBA3099A90D40E5A655F4041C7D1B2AEB4604",
+          "state": 1,
+          "alias": "Plug 5",
+          "on_time": 1348,
+          "next_action": {
+            "type": -1
+          }
+        },
+        {
+          "id": "80061BBA3099A90D40E5A655F4041C7D1B2AEB4605",
+          "state": 1,
+          "alias": "Plug 6",
+          "on_time": 1348,
+          "next_action": {
+            "type": -1
+          }
+        }
+      ],
+      "child_num": 6,
+    }
+  }
+}
