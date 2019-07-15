@@ -64,7 +64,7 @@ func (p *HS103Plug) Info() (*Sysinfo, error) {
 	return &d.System.Sysinfo, nil
 }
 
-func HALAdapter(c []byte, _ i2c.Bus) (hal.Driver, error) {
+func HS103HALAdapter(c []byte, _ i2c.Bus) (hal.Driver, error) {
 	var conf Config
 	if err := json.Unmarshal(c, &conf); err != nil {
 		return nil, err

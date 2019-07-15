@@ -30,7 +30,7 @@ func TestHS103Plug(t *testing.T) {
 		t.Error(err)
 	}
 
-	d, err := HALAdapter([]byte(`{"address":"127.0.0.1:3000"}`), nil)
+	d, err := HS103HALAdapter([]byte(`{"address":"127.0.0.1:3000"}`), nil)
 	if err != nil {
 		t.Error(err)
 	}
