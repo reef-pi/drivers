@@ -43,11 +43,10 @@ func command(cf ConnectionFactory, addr string, cmd interface{}) ([]byte, error)
 	if err != nil {
 		return nil, err
 	}
-	tmp := make([]byte, 4)
-	if _, err := conn.Read(tmp); err != nil {
+	if _, err := conn.Read(header); err != nil {
 		return nil, err
 	}
-	buf := make([]byte, 16*1024)
+	buf := make([]byte, 40*1024)
 	l, rErr := conn.Read(buf)
 	if rErr != nil && rErr != io.EOF {
 		return nil, rErr
