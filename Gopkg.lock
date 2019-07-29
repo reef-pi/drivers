@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:80c9b00927fd43dab5eeac08433fa3f665f4b8661ccc590922cdd856d69d6676"
+  digest = "1:d42efd1125c54e0a4e625959feb043d6791960bfd47e99af4aa730aa66470b79"
   name = "github.com/reef-pi/hal"
   packages = ["."]
   pruneopts = "UT"
-  revision = "ff9ee5eb3c4692848323d466ce47090c223e8c60"
+  revision = "75ffcaf9358b0a446e600e22a6bacfef8d6f1507"
 
 [[projects]]
   branch = "master"
@@ -15,7 +15,7 @@
   name = "github.com/reef-pi/rpi"
   packages = ["i2c"]
   pruneopts = "UT"
-  revision = "3bdf80463c4d7fac14081c0661cb0665333203ad"
+  revision = "c267e5c3bcadf7bf5e0d2e984404a20904747d32"
 
 [solve-meta]
   analyzer-name = "dep"
