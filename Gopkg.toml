@@ -1,0 +1,11 @@
+[[constraint]]
+  branch = "master"
+  name = "github.com/reef-pi/hal"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/reef-pi/rpi"
+
+[prune]
+  go-tests = true
+  unused-packages = true
