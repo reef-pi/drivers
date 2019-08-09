@@ -7,31 +7,37 @@ import (
 	"github.com/reef-pi/rpi/i2c"
 )
 
+var params = map[string]interface{}{
+	"Address": 72,
+}
+
 func TestPhBoardDriver(t *testing.T) {
 	bus := i2c.MockBus()
 	bus.Bytes = make([]byte, 2)
-	_, err := HalAdapter([]byte(""), bus)
+
+	f := Factory()
+	_, err := f.NewDriver(nil, bus)
+
 	if err == nil {
 		t.Error("Adapter creation should fail when json config is invalid")
 	}
-	configJSON := `
-	{
-		"address":72
-	}
-	`
-	d, err := NewDriver([]byte(configJSON), bus)
+
+	driver, err := f.NewDriver(params, bus)
+
 	if err != nil {
 		t.Error(err)
 	}
-	if d.Metadata().Name != "pico-board" {
+	if driver.Metadata().Name != "pico-board" {
 		t.Error("Unexpected name")
 	}
-	if !d.Metadata().HasCapability(hal.AnalogInput) {
+	if !driver.Metadata().HasCapability(hal.AnalogInput) {
 		t.Error("analog input cpability should exist")
 	}
-	if d.Metadata().HasCapability(hal.DigitalInput) {
+	if driver.Metadata().HasCapability(hal.DigitalInput) {
 		t.Error("Digital input Capability should not exist")
 	}
+
+	d := driver.(hal.AnalogInputDriver)
 
 	if len(d.AnalogInputPins()) != 1 {
 		t.Error("Expected only one channel")

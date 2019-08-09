@@ -1,7 +1,6 @@
 package ezo
 
 import (
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -24,19 +23,6 @@ type AtlasEZO struct {
 	bus   i2c.Bus
 	delay time.Duration
 	meta  hal.Metadata
-}
-
-func NewAtlasEZO(addr byte, bus i2c.Bus) *AtlasEZO {
-	return &AtlasEZO{
-		addr:  addr,
-		bus:   bus,
-		delay: time.Second,
-		meta: hal.Metadata{
-			Name:         _ezoName,
-			Description:  "Atlas Scientific EZO board for pH sensor",
-			Capabilities: []hal.Capability{hal.AnalogInput},
-		},
-	}
 }
 
 func (a *AtlasEZO) extractIntResponse() (int, error) {
@@ -209,9 +195,11 @@ func (a *AtlasEZO) SetTC(t float64) error {
 func (a *AtlasEZO) Name() string {
 	return _ezoName
 }
+
 func (a *AtlasEZO) Close() error {
 	return nil
 }
+
 func (a *AtlasEZO) Metadata() hal.Metadata {
 	return a.meta
 }
@@ -251,6 +239,7 @@ func (a *AtlasEZO) AnalogInputPin(u int) (hal.AnalogInputPin, error) {
 func (a *AtlasEZO) AnalogInputPins() []hal.AnalogInputPin {
 	return []hal.AnalogInputPin{a}
 }
+
 func (a *AtlasEZO) Pins(cap hal.Capability) ([]hal.Pin, error) {
 	switch cap {
 	case hal.AnalogInput:
@@ -258,19 +247,6 @@ func (a *AtlasEZO) Pins(cap hal.Capability) ([]hal.Pin, error) {
 	default:
 		return nil, fmt.Errorf("unsupported capability:%s", cap.String())
 	}
-}
-
-type EzoConfig struct {
-	Address byte `json:"address"`
-}
-
-func EzoHalAdapter(conf []byte, b i2c.Bus) (hal.Driver, error) {
-	var config EzoConfig
-	if err := json.Unmarshal(conf, &config); err != nil {
-		return nil, err
-	}
-
-	return NewAtlasEZO(config.Address, b), nil
 }
 
 func (a *AtlasEZO) Number() int {

@@ -1,46 +1,14 @@
 package pico_board
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/reef-pi/hal"
-	"github.com/reef-pi/rpi/i2c"
 )
-
-var driverMeta = hal.Metadata{
-	Name:         "pico-board",
-	Description:  "Isolated ATSAMD10 pH driver on the blueAcro Pico board",
-	Capabilities: []hal.Capability{hal.AnalogInput},
-}
-
-type Config struct {
-	Address byte `json:"address"`
-}
 
 type driver struct {
 	channels []hal.AnalogInputPin
 	meta     hal.Metadata
-}
-
-func HalAdapter(c []byte, bus i2c.Bus) (hal.Driver, error) {
-	return NewDriver(c, bus)
-}
-
-func NewDriver(c []byte, bus i2c.Bus) (hal.AnalogInputDriver, error) {
-	var config Config
-	if err := json.Unmarshal(c, &config); err != nil {
-		return nil, err
-	}
-
-	ch, err := NewChannel(bus, config.Address)
-	if err != nil {
-		return nil, err
-	}
-	return &driver{
-		channels: []hal.AnalogInputPin{ch},
-		meta:     driverMeta,
-	}, nil
 }
 
 func (d *driver) Metadata() hal.Metadata {

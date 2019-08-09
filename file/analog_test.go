@@ -16,7 +16,14 @@ func TestAnalogInput(t *testing.T) {
 	temp.Write([]byte("23.1"))
 	temp.Close()
 	defer os.Remove(temp.Name())
-	d, err := NewAnalog(temp.Name())
+
+	params := map[string]interface{}{
+		"Path": temp.Name(),
+	}
+
+	f := AnalogFactory()
+	d, err := f.NewDriver(params, nil)
+
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +31,11 @@ func TestAnalogInput(t *testing.T) {
 	if len(meta.Capabilities) != 1 {
 		t.Error("Expected 1 capabilities, found:", len(meta.Capabilities))
 	}
-	dig := hal.AnalogInputDriver(d)
+
+	dig, ok := d.(hal.AnalogInputDriver)
+	if !ok {
+		t.Error("Failed to type cast analog file driver to analog input driver")
+	}
 
 	if len(dig.AnalogInputPins()) != 1 {
 		t.Error("Expected a single input pin, found:", len(dig.AnalogInputPins()))

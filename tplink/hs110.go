@@ -2,10 +2,11 @@ package tplink
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/reef-pi/hal"
-	"github.com/reef-pi/rpi/i2c"
 )
 
 type (
@@ -31,32 +32,20 @@ type HS110Plug struct {
 func (p *HS110Plug) Number() int {
 	return 0
 }
-func NewHS110Plug(addr string) *HS110Plug {
+
+func newHS110Plug(addr string, meta hal.Metadata) *HS110Plug {
 	cal, _ := hal.CalibratorFactory([]hal.Measurement{})
+
 	return &HS110Plug{
 		HS103Plug: HS103Plug{
 			command: &cmd{
 				addr: addr,
 				cf:   TCPConnFactory,
 			},
-			meta: hal.Metadata{
-				Name:        "tplink-hs110",
-				Description: "tplink hs110 series smart plug driver with current monitoring",
-				Capabilities: []hal.Capability{
-					hal.DigitalOutput, hal.AnalogInput,
-				},
-			},
+			meta: meta,
 		},
 		calibrator: cal,
 	}
-}
-
-func HS110HALAdapter(c []byte, _ i2c.Bus) (hal.Driver, error) {
-	var conf Config
-	if err := json.Unmarshal(c, &conf); err != nil {
-		return nil, err
-	}
-	return NewHS110Plug(conf.Address), nil
 }
 
 func (p *HS110Plug) RTEmeter() (*Realtime, error) {
@@ -120,4 +109,74 @@ func (p *HS110Plug) Pins(cap hal.Capability) ([]hal.Pin, error) {
 	default:
 		return nil, fmt.Errorf("unsupported capability:%s", cap)
 	}
+}
+
+type hs110Factory struct {
+	meta       hal.Metadata
+	parameters []hal.ConfigParameter
+}
+
+var factory110 *hs110Factory
+var hs110once sync.Once
+
+// HS110Factory returns a singleton HS110 Driver factory
+func HS110Factory() hal.DriverFactory {
+
+	hs110once.Do(func() {
+		factory110 = &hs110Factory{
+			meta: hal.Metadata{
+				Name:        "tplink-hs110",
+				Description: "tplink hs110 series smart plug driver with current monitoring",
+				Capabilities: []hal.Capability{
+					hal.DigitalOutput, hal.AnalogInput,
+				},
+			},
+			parameters: []hal.ConfigParameter{
+				{
+					Name:    "Address",
+					Type:    hal.String,
+					Order:   0,
+					Default: "192.168.1.11:9999",
+				},
+			},
+		}
+	})
+
+	return factory110
+}
+
+func (f *hs110Factory) Metadata() hal.Metadata {
+	return f.meta
+}
+
+func (f *hs110Factory) GetParameters() []hal.ConfigParameter {
+	return f.parameters
+}
+
+func (f *hs110Factory) ValidateParameters(parameters map[string]interface{}) (bool, map[string][]string) {
+
+	var failures = make(map[string][]string)
+
+	if v, ok := parameters["Address"]; ok {
+		_, ok := v.(string)
+		if !ok {
+			failure := fmt.Sprint("Address is not a string. ", v, " was received.")
+			failures["Address"] = append(failures["Address"], failure)
+		}
+	} else {
+		failure := fmt.Sprint("Address is a required parameter, but was not received.")
+		failures["Address"] = append(failures["Address"], failure)
+	}
+
+	return len(failures) == 0, failures
+}
+
+func (f *hs110Factory) NewDriver(parameters map[string]interface{}, hardwareResources interface{}) (hal.Driver, error) {
+	if valid, failures := f.ValidateParameters(parameters); !valid {
+		return nil, errors.New(hal.ToErrorString(failures))
+	}
+
+	addr := parameters["Address"].(string)
+
+	return newHS110Plug(addr, f.meta), nil
 }

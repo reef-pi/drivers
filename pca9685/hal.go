@@ -1,14 +1,11 @@
 package pca9685
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
 	"sort"
 	"sync"
 
 	"github.com/reef-pi/hal"
-	"github.com/reef-pi/rpi/i2c"
 )
 
 type PCA9685Config struct {
@@ -47,46 +44,9 @@ func (c *pca9685Channel) Write(b bool) error {
 func (c *pca9685Channel) LastState() bool { return c.v == 100 }
 
 type pca9685Driver struct {
-	config   PCA9685Config
 	hwDriver *PCA9685
 	mu       *sync.Mutex
 	channels []*pca9685Channel
-}
-
-var DefaultPCA9685Config = PCA9685Config{
-	Address:   0x40,
-	Frequency: 1500,
-}
-
-func HALAdapter(c []byte, bus i2c.Bus) (hal.Driver, error) {
-	config := DefaultPCA9685Config
-	if err := json.Unmarshal(c, &config); err != nil {
-		return nil, err
-	}
-
-	hwDriver := New(byte(config.Address), bus)
-	pwm := pca9685Driver{
-		config:   config,
-		mu:       &sync.Mutex{},
-		hwDriver: hwDriver,
-	}
-	if config.Frequency == 0 {
-		log.Println("WARNING: pca9685 driver pwm frequency set to 0. Falling back to 1500")
-		config.Frequency = 1500
-	}
-	hwDriver.Freq = config.Frequency // overriding default
-
-	// Create the 16 channels the hardware has
-	for i := 0; i < 16; i++ {
-		ch := &pca9685Channel{
-			channel: i,
-			driver:  &pwm,
-		}
-		pwm.channels = append(pwm.channels, ch)
-	}
-
-	// Wake the hardware
-	return &pwm, hwDriver.Wake()
 }
 
 func (p *pca9685Driver) Close() error {
