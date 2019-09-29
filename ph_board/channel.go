@@ -2,9 +2,10 @@ package ph_board
 
 import (
 	"fmt"
+	"math"
+
 	"github.com/reef-pi/hal"
 	"github.com/reef-pi/rpi/i2c"
-	"math"
 )
 
 const chName = "0"

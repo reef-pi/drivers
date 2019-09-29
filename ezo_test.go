@@ -1,8 +1,9 @@
 package drivers
 
 import (
-	"github.com/reef-pi/hal"
 	"testing"
+
+	"github.com/reef-pi/hal"
 
 	"github.com/reef-pi/rpi/i2c"
 )
