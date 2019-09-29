@@ -6,13 +6,27 @@ import (
 	"strconv"
 	"strings"
 
+	"encoding/json"
 	"github.com/reef-pi/hal"
+	"github.com/reef-pi/rpi/i2c"
 )
+
+type Config struct {
+	Address string `json:"address"`
+}
 
 type analog struct {
 	path       string
 	meta       hal.Metadata
 	calibrator hal.Calibrator
+}
+
+func HalAnalogAdapter(c []byte, _ i2c.Bus) (hal.Driver, error) {
+	var config Config
+	if err := json.Unmarshal(c, &config); err != nil {
+		return nil, err
+	}
+	return NewAnalog(config.Address)
 }
 
 func NewAnalog(p string) (*analog, error) {

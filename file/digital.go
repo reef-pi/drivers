@@ -5,13 +5,23 @@ import (
 	"strconv"
 	"strings"
 
+	"encoding/json"
 	"github.com/reef-pi/hal"
+	"github.com/reef-pi/rpi/i2c"
 )
 
 type digital struct {
 	path      string
 	meta      hal.Metadata
 	lastState bool
+}
+
+func HalDigitalAdapter(c []byte, _ i2c.Bus) (hal.Driver, error) {
+	var config Config
+	if err := json.Unmarshal(c, &config); err != nil {
+		return nil, err
+	}
+	return NewDigital(config.Address), nil
 }
 
 func NewDigital(p string) *digital {
