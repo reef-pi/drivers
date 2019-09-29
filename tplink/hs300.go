@@ -3,6 +3,7 @@ package tplink
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/reef-pi/hal"
 	"github.com/reef-pi/rpi/i2c"
 )

@@ -2,9 +2,10 @@ package ph_board
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/reef-pi/hal"
 	"github.com/reef-pi/rpi/i2c"
-	"testing"
 )
 
 func demo() {

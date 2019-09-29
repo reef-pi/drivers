@@ -1,8 +1,9 @@
 package tplink
 
 import (
-	"github.com/reef-pi/hal"
 	"testing"
+
+	"github.com/reef-pi/hal"
 )
 
 func TestHS110Plug(t *testing.T) {

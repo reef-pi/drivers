@@ -1,9 +1,10 @@
 package tplink
 
 import (
-	"github.com/reef-pi/hal"
 	"testing"
 	"time"
+
+	"github.com/reef-pi/hal"
 )
 
 type mockConn struct {

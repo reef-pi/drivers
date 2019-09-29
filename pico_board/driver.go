@@ -8,7 +8,7 @@ import (
 	"github.com/reef-pi/rpi/i2c"
 )
 
-var driverMeta =  hal.Metadata{
+var driverMeta = hal.Metadata{
 	Name:         "pico-board",
 	Description:  "Isolated ATSAMD10 pH driver on the blueAcro Pico board",
 	Capabilities: []hal.Capability{hal.PH},
@@ -38,7 +38,7 @@ func NewDriver(c []byte, bus i2c.Bus) (hal.ADCDriver, error) {
 	}
 	return &driver{
 		channels: []hal.ADCChannel{ch},
-		meta: driverMeta,
+		meta:     driverMeta,
 	}, nil
 }
 func (d *driver) Metadata() hal.Metadata {

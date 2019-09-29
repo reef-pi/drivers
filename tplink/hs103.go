@@ -3,10 +3,11 @@ package tplink
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/reef-pi/hal"
-	"github.com/reef-pi/rpi/i2c"
 	"net"
 	"time"
+
+	"github.com/reef-pi/hal"
+	"github.com/reef-pi/rpi/i2c"
 )
 
 type HS103Plug struct {
