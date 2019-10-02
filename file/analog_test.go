@@ -24,11 +24,12 @@ func TestAnalogInput(t *testing.T) {
 	if len(meta.Capabilities) != 1 {
 		t.Error("Expected 1 capabilities, found:", len(meta.Capabilities))
 	}
-	dig := hal.ADCDriver(d)
-	if len(dig.ADCChannels()) != 1 {
-		t.Error("Expected a single input pin, found:", len(dig.ADCChannels()))
+	dig := hal.AnalogInputDriver(d)
+
+	if len(dig.AnalogInputPins()) != 1 {
+		t.Error("Expected a single input pin, found:", len(dig.AnalogInputPins()))
 	}
-	pin, err := dig.ADCChannel(0)
+	pin, err := dig.AnalogInputPin(0)
 	if err != nil {
 		t.Error(err)
 	}

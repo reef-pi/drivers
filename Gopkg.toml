@@ -1,9 +1,9 @@
 [[constraint]]
-  branch = "master"
+  branch = "pin_map"
   name = "github.com/reef-pi/hal"
 
 [[constraint]]
-  branch = "master"
+  branch = "pin_map"
   name = "github.com/reef-pi/rpi"
 
 [prune]

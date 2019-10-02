@@ -20,11 +20,11 @@ func TestDigitalInput(t *testing.T) {
 	if len(meta.Capabilities) != 3 {
 		t.Error("Expected 3 capabilities, found:", len(meta.Capabilities))
 	}
-	dig := hal.InputDriver(d)
-	if len(dig.InputPins()) != 1 {
-		t.Error("Expected a single input pin, found:", len(dig.InputPins()))
+	dig := hal.DigitalInputDriver(d)
+	if len(dig.DigitalInputPins()) != 1 {
+		t.Error("Expected a single input pin, found:", len(dig.DigitalInputPins()))
 	}
-	pin, err := dig.InputPin(0)
+	pin, err := dig.DigitalInputPin(0)
 	if err != nil {
 		t.Error(err)
 	}
@@ -44,8 +44,8 @@ func TestDigitalOutput(t *testing.T) {
 	temp.Close()
 	defer os.Remove(temp.Name())
 	d := NewDigital(temp.Name())
-	dig := hal.OutputDriver(d)
-	pin, err := dig.OutputPin(0)
+	dig := hal.DigitalOutputDriver(d)
+	pin, err := dig.DigitalOutputPin(0)
 	if err != nil {
 		t.Error(err)
 	}
