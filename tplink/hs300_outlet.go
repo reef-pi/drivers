@@ -15,11 +15,15 @@ type (
 		state      bool
 		cnFactory  ConnectionFactory
 		calibrator hal.Calibrator
+		number     int
 	}
 )
 
 func (o *Outlet) Name() string {
 	return o.name
+}
+func (o *Outlet) Number() int {
+	return o.number
 }
 
 func (o *Outlet) Write(state bool) error {

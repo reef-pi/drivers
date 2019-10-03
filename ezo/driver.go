@@ -272,3 +272,7 @@ func EzoHalAdapter(conf []byte, b i2c.Bus) (hal.Driver, error) {
 
 	return NewAtlasEZO(config.Address, b), nil
 }
+
+func (a *AtlasEZO) Number() int {
+	return 0
+}

@@ -81,6 +81,9 @@ func (p *HS103Plug) Name() string {
 	return p.meta.Name
 }
 
+func (p *HS103Plug) Number() int {
+	return 0
+}
 func (p *HS103Plug) DigitalOutputPins() []hal.DigitalOutputPin {
 	return []hal.DigitalOutputPin{p}
 }

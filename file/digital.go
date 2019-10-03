@@ -40,6 +40,9 @@ func (f *digital) Metadata() hal.Metadata {
 	return f.meta
 }
 
+func (d *digital) Number() int {
+	return 0
+}
 func (f *digital) Close() error {
 	return nil
 }

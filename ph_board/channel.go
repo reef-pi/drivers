@@ -31,6 +31,9 @@ func NewChannel(b i2c.Bus, addr byte) (*channel, error) {
 func (c *channel) Name() string {
 	return chName
 }
+func (c *channel) Number() int {
+	return 0
+}
 
 func (c *channel) Calibrate(points []hal.Measurement) error {
 	cal, err := hal.CalibratorFactory(points)
