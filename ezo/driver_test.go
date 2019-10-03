@@ -1,4 +1,4 @@
-package drivers
+package ezo
 
 import (
 	"testing"
@@ -70,28 +70,28 @@ func TestEZOHalAdapter(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	d, ok := e.(hal.ADCDriver)
+	d, ok := e.(hal.AnalogInputDriver)
 	if !ok {
 		t.Error("Failed to type cast ezo driver to ADC driver")
 	}
 	if d.Metadata().Name != _ezoName {
 		t.Error("Unexpected name")
 	}
-	if !d.Metadata().HasCapability(hal.PH) {
+	if !d.Metadata().HasCapability(hal.AnalogInput) {
 		t.Error("PH Capability should exist")
 	}
-	if d.Metadata().HasCapability(hal.Input) {
+	if d.Metadata().HasCapability(hal.DigitalInput) {
 		t.Error("Input Capability should not exist")
 	}
 
-	if len(d.ADCChannels()) != 1 {
+	if len(d.AnalogInputPins()) != 1 {
 		t.Error("Expected only one channel")
 	}
-	if _, err := d.ADCChannel(1); err == nil {
+	if _, err := d.AnalogInputPin(1); err == nil {
 		t.Error("Expected error for invalid channel name")
 	}
 
-	if _, err := d.ADCChannel(0); err != nil {
+	if _, err := d.AnalogInputPin(0); err != nil {
 		t.Error(err)
 	}
 	if err := d.Close(); err != nil {

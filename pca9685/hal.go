@@ -124,15 +124,15 @@ func (p *pca9685Driver) PWMChannel(chnum int) (hal.PWMChannel, error) {
 	}
 	return p.channels[chnum], nil
 }
-func (p *pca9685Driver) OutputPins() []hal.OutputPin {
-	pins := make([]hal.OutputPin, len(p.channels))
+func (p *pca9685Driver) DigitalOutputPins() []hal.DigitalOutputPin {
+	pins := make([]hal.DigitalOutputPin, len(p.channels))
 	for i, ch := range p.channels {
 		pins[i] = ch
 	}
 	return pins
 }
 
-func (p *pca9685Driver) OutputPin(n int) (hal.OutputPin, error) {
+func (p *pca9685Driver) DigitalOutputPin(n int) (hal.DigitalOutputPin, error) {
 	return p.PWMChannel(n)
 }
 
@@ -144,4 +144,17 @@ func (p *pca9685Driver) set(pin int, value float64) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	return p.hwDriver.SetPwm(pin, 0, uint16(value*40.95))
+}
+
+func (p *pca9685Driver) Pins(cap hal.Capability) ([]hal.Pin, error) {
+	switch cap {
+	case hal.DigitalOutput, hal.PWM:
+		var pins []hal.Pin
+		for _, pin := range p.channels {
+			pins = append(pins, pin)
+		}
+		return pins, nil
+	default:
+		return nil, fmt.Errorf("unsupported capability: %s", cap.String())
+	}
 }

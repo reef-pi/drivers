@@ -11,7 +11,7 @@ import (
 var driverMeta = hal.Metadata{
 	Name:         "pico-board",
 	Description:  "Isolated ATSAMD10 pH driver on the blueAcro Pico board",
-	Capabilities: []hal.Capability{hal.PH},
+	Capabilities: []hal.Capability{hal.AnalogInput},
 }
 
 type Config struct {
@@ -19,14 +19,15 @@ type Config struct {
 }
 
 type driver struct {
-	channels []hal.ADCChannel
+	channels []hal.AnalogInputPin
 	meta     hal.Metadata
 }
 
 func HalAdapter(c []byte, bus i2c.Bus) (hal.Driver, error) {
 	return NewDriver(c, bus)
 }
-func NewDriver(c []byte, bus i2c.Bus) (hal.ADCDriver, error) {
+
+func NewDriver(c []byte, bus i2c.Bus) (hal.AnalogInputDriver, error) {
 	var config Config
 	if err := json.Unmarshal(c, &config); err != nil {
 		return nil, err
@@ -37,19 +38,33 @@ func NewDriver(c []byte, bus i2c.Bus) (hal.ADCDriver, error) {
 		return nil, err
 	}
 	return &driver{
-		channels: []hal.ADCChannel{ch},
+		channels: []hal.AnalogInputPin{ch},
 		meta:     driverMeta,
 	}, nil
 }
+
 func (d *driver) Metadata() hal.Metadata {
 	return d.meta
 }
 
-func (d *driver) ADCChannels() []hal.ADCChannel {
+func (d *driver) AnalogInputPins() []hal.AnalogInputPin {
 	return d.channels
 }
 
-func (d *driver) ADCChannel(n int) (hal.ADCChannel, error) {
+func (d *driver) Pins(cap hal.Capability) ([]hal.Pin, error) {
+	switch cap {
+	case hal.PWM, hal.DigitalOutput:
+		var pins []hal.Pin
+		for _, pin := range d.channels {
+			pins = append(pins, pin)
+		}
+		return pins, nil
+	default:
+		return nil, fmt.Errorf("unsupported capability:%s", cap.String())
+	}
+}
+
+func (d *driver) AnalogInputPin(n int) (hal.AnalogInputPin, error) {
 	if n != 0 {
 		return nil, fmt.Errorf("ph board does not have channel %d", n)
 	}

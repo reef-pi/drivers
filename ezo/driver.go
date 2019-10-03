@@ -1,4 +1,4 @@
-package drivers
+package ezo
 
 import (
 	"encoding/json"
@@ -34,7 +34,7 @@ func NewAtlasEZO(addr byte, bus i2c.Bus) *AtlasEZO {
 		meta: hal.Metadata{
 			Name:         _ezoName,
 			Description:  "Atlas Scientific EZO board for pH sensor",
-			Capabilities: []hal.Capability{hal.PH},
+			Capabilities: []hal.Capability{hal.AnalogInput},
 		},
 	}
 }
@@ -241,15 +241,23 @@ func (a *AtlasEZO) Measure() (float64, error) {
 	return a.Read()
 }
 
-func (a *AtlasEZO) ADCChannel(u int) (hal.ADCChannel, error) {
+func (a *AtlasEZO) AnalogInputPin(u int) (hal.AnalogInputPin, error) {
 	if u != 0 {
 		return nil, fmt.Errorf("EZO pH driver has only one valid channel: 0. Asked:%d", u)
 	}
 	return a, nil
 }
 
-func (a *AtlasEZO) ADCChannels() []hal.ADCChannel {
-	return []hal.ADCChannel{a}
+func (a *AtlasEZO) AnalogInputPins() []hal.AnalogInputPin {
+	return []hal.AnalogInputPin{a}
+}
+func (a *AtlasEZO) Pins(cap hal.Capability) ([]hal.Pin, error) {
+	switch cap {
+	case hal.AnalogInput:
+		return []hal.Pin{a}, nil
+	default:
+		return nil, fmt.Errorf("unsupported capability:%s", cap.String())
+	}
 }
 
 type EzoConfig struct {
