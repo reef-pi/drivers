@@ -19,12 +19,12 @@ func TestHALAdapter(t *testing.T) {
 	if meta.Name != "pca9685" {
 		t.Errorf("name %s did not match pca9685", meta.Name)
 	}
-	for _, cap := range meta.Capabilities {
-		if cap != hal.PWM {
-			t.Error("driver didn't indicate it supports PWM")
-		}
+	if meta.Capabilities[0] != hal.PWM {
+		t.Error("driver didn't indicate it supports PWM")
 	}
-
+	if meta.Capabilities[0] != hal.DigitalOutput {
+		t.Error("driver didn't indicate it supports digital output")
+	}
 	pwmDriver, ok := driver.(hal.PWMDriver)
 	if !ok {
 		t.Error("driver is not a PWM interface")
