@@ -26,21 +26,21 @@ func TestPhBoardDriver(t *testing.T) {
 	if d.Metadata().Name != "pico-board" {
 		t.Error("Unexpected name")
 	}
-	if !d.Metadata().HasCapability(hal.PH) {
-		t.Error("PH Capability should exist")
+	if !d.Metadata().HasCapability(hal.AnalogInput) {
+		t.Error("analog input cpability should exist")
 	}
-	if d.Metadata().HasCapability(hal.Input) {
-		t.Error("Input Capability should not exist")
+	if d.Metadata().HasCapability(hal.DigitalInput) {
+		t.Error("Digital input Capability should not exist")
 	}
 
-	if len(d.ADCChannels()) != 1 {
+	if len(d.AnalogInputPins()) != 1 {
 		t.Error("Expected only one channel")
 	}
-	if _, err := d.ADCChannel(1); err == nil {
+	if _, err := d.AnalogInputPin(1); err == nil {
 		t.Error("Expected error for invalid channel name")
 	}
 
-	ch, err := d.ADCChannel(0)
+	ch, err := d.AnalogInputPin(0)
 	if err != nil {
 		t.Error(err)
 	}

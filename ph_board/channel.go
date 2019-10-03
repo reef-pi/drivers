@@ -63,3 +63,7 @@ func (c *channel) Measure() (float64, error) {
 	}
 	return c.calibrator.Calibrate(v), nil
 }
+
+func (c *channel) Close() error {
+	return nil
+}

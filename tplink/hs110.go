@@ -37,7 +37,7 @@ func NewHS110Plug(addr string) *HS110Plug {
 				Name:        "tplink-hs110",
 				Description: "tplink hs110 series smart plug driver with current monitoring",
 				Capabilities: []hal.Capability{
-					hal.Output, hal.PH,
+					hal.DigitalOutput, hal.AnalogInput,
 				},
 			},
 			cnFactory: TCPConnFactory,
@@ -66,11 +66,11 @@ func (p *HS110Plug) RTEmeter() (*Realtime, error) {
 	return &cmd.Emeter.Realtime, nil
 }
 
-func (p *HS110Plug) ADCChannels() []hal.ADCChannel {
-	return []hal.ADCChannel{p}
+func (p *HS110Plug) AnalogInputPins() []hal.AnalogInputPin {
+	return []hal.AnalogInputPin{p}
 }
 
-func (p *HS110Plug) ADCChannel(i int) (hal.ADCChannel, error) {
+func (p *HS110Plug) AnalogInputPin(i int) (hal.AnalogInputPin, error) {
 	if i != 0 {
 		return nil, fmt.Errorf("invalid channel number: %d", i)
 	}
@@ -102,4 +102,13 @@ func (p *HS110Plug) Measure() (float64, error) {
 		return 0, fmt.Errorf("Not calibrated")
 	}
 	return p.calibrator.Calibrate(v), nil
+}
+
+func (p *HS110Plug) Pins(cap hal.Capability) ([]hal.Pin, error) {
+	switch cap {
+	case hal.DigitalOutput, hal.AnalogInput:
+		return []hal.Pin{p}, nil
+	default:
+		return nil, fmt.Errorf("unsupported capability:%s", cap)
+	}
 }

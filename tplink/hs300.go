@@ -39,7 +39,7 @@ func NewHS300Strip(addr string) *HS300Strip {
 			Name:        "tplink-hs300",
 			Description: "tplink hs300 series smart power strip driver with current monitoring",
 			Capabilities: []hal.Capability{
-				hal.Output, hal.PH,
+				hal.DigitalOutput, hal.AnalogInput,
 			},
 		},
 		cnFactory: TCPConnFactory,
@@ -64,15 +64,15 @@ func (s *HS300Strip) Name() string {
 	return s.meta.Name
 }
 
-func (s *HS300Strip) OutputPins() []hal.OutputPin {
-	var pins []hal.OutputPin
+func (s *HS300Strip) OutputPins() []hal.DigitalOutputPin {
+	var pins []hal.DigitalOutputPin
 	for _, o := range s.children {
 		pins = append(pins, o)
 	}
 	return pins
 }
 
-func (s *HS300Strip) OutputPin(i int) (hal.OutputPin, error) {
+func (s *HS300Strip) DigitalOutputPin(i int) (hal.DigitalOutputPin, error) {
 	if i < 0 || i > 5 {
 		return nil, fmt.Errorf("invalid pin: %d", i)
 	}
@@ -109,17 +109,30 @@ func (s *HS300Strip) Children() []*Outlet {
 	return s.children
 }
 
-func (p *HS300Strip) ADCChannels() []hal.ADCChannel {
-	var channels []hal.ADCChannel
+func (p *HS300Strip) AnalogInputPins() []hal.AnalogInputPin {
+	var channels []hal.AnalogInputPin
 	for _, o := range p.children {
 		channels = append(channels, o)
 	}
 	return channels
 }
 
-func (p *HS300Strip) ADCChannel(i int) (hal.ADCChannel, error) {
+func (p *HS300Strip) AnalogInputPin(i int) (hal.AnalogInputPin, error) {
 	if i < 0 || i > 5 {
 		return nil, fmt.Errorf("invalid channel number: %d", i)
 	}
 	return p.children[i], nil
+}
+
+func (p *HS300Strip) Pins(cap hal.Capability) ([]hal.Pin, error) {
+	switch cap {
+	case hal.DigitalOutput, hal.AnalogInput:
+		var channels []hal.Pin
+		for _, o := range p.children {
+			channels = append(channels, o)
+		}
+		return channels, nil
+	default:
+		return nil, fmt.Errorf("unsupported capability:%s", cap.String())
+	}
 }

@@ -24,7 +24,7 @@ func NewHS103Plug(addr string) *HS103Plug {
 			Name:        "tplink-hs103",
 			Description: "tplink hs103 series smart plug driver",
 			Capabilities: []hal.Capability{
-				hal.Output,
+				hal.DigitalOutput,
 			},
 		},
 		cnFactory: func(proto, addr string, t time.Duration) (Conn, error) {
@@ -81,11 +81,11 @@ func (p *HS103Plug) Name() string {
 	return p.meta.Name
 }
 
-func (p *HS103Plug) OutputPins() []hal.OutputPin {
-	return []hal.OutputPin{p}
+func (p *HS103Plug) DigitalOutputPins() []hal.DigitalOutputPin {
+	return []hal.DigitalOutputPin{p}
 }
 
-func (p *HS103Plug) OutputPin(i int) (hal.OutputPin, error) {
+func (p *HS103Plug) DigitalOutputPin(i int) (hal.DigitalOutputPin, error) {
 	if i != 0 {
 		return nil, fmt.Errorf("invalid pin: %d", i)
 	}
@@ -105,4 +105,12 @@ func (p *HS103Plug) LastState() bool {
 
 func (p *HS103Plug) Close() error {
 	return nil
+}
+func (p *HS103Plug) Pins(cap hal.Capability) ([]hal.Pin, error) {
+	switch cap {
+	case hal.DigitalOutput:
+		return []hal.Pin{p}, nil
+	default:
+		return nil, fmt.Errorf("unsupported capability:%s", cap.String())
+	}
 }

@@ -1,6 +1,7 @@
 package file
 
 import (
+	"fmt"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -30,7 +31,7 @@ func NewDigital(p string) *digital {
 		meta: hal.Metadata{
 			Name:         "digital-file",
 			Description:  "A simple file based digital hal driver",
-			Capabilities: []hal.Capability{hal.Input, hal.Output, hal.PWM},
+			Capabilities: []hal.Capability{hal.DigitalInput, hal.DigitalOutput, hal.PWM},
 		},
 	}
 }
@@ -72,19 +73,19 @@ func (f *digital) Set(v float64) error {
 	return ioutil.WriteFile(f.path, []byte(strconv.FormatFloat(v, 'f', -1, 64)), 0644)
 }
 
-func (f *digital) InputPins() []hal.InputPin {
-	return []hal.InputPin{f}
+func (f *digital) DigitalInputPins() []hal.DigitalInputPin {
+	return []hal.DigitalInputPin{f}
 }
 
-func (f *digital) InputPin(_ int) (hal.InputPin, error) {
+func (f *digital) DigitalInputPin(_ int) (hal.DigitalInputPin, error) {
 	return f, nil
 }
 
-func (f *digital) OutputPins() []hal.OutputPin {
-	return []hal.OutputPin{f}
+func (f *digital) DigitalOutputPins() []hal.DigitalOutputPin {
+	return []hal.DigitalOutputPin{f}
 }
 
-func (f *digital) OutputPin(_ int) (hal.OutputPin, error) {
+func (f *digital) DigitalOutputPin(_ int) (hal.DigitalOutputPin, error) {
 	return f, nil
 }
 func (f *digital) PWMChannels() []hal.PWMChannel {
@@ -93,4 +94,12 @@ func (f *digital) PWMChannels() []hal.PWMChannel {
 
 func (f *digital) PWMChannel(_ int) (hal.PWMChannel, error) {
 	return f, nil
+}
+func (f *digital) Pins(cap hal.Capability) ([]hal.Pin, error) {
+	switch cap {
+	case hal.DigitalInput, hal.DigitalOutput, hal.PWM:
+		return []hal.Pin{f}, nil
+	default:
+		return nil, fmt.Errorf("unsupported capability:%s", cap.String())
+	}
 }

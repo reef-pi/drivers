@@ -40,7 +40,7 @@ func NewAnalog(p string) (*analog, error) {
 		meta: hal.Metadata{
 			Name:         "analog-file",
 			Description:  "A simple file based analog hal driver",
-			Capabilities: []hal.Capability{hal.PH},
+			Capabilities: []hal.Capability{hal.AnalogInput},
 		},
 	}, nil
 }
@@ -84,10 +84,17 @@ func (f *analog) Calibrate(points []hal.Measurement) error {
 	return nil
 }
 
-func (f *analog) ADCChannels() []hal.ADCChannel {
-	return []hal.ADCChannel{f}
+func (f *analog) AnalogInputPins() []hal.AnalogInputPin {
+	return []hal.AnalogInputPin{f}
 }
 
-func (f *analog) ADCChannel(_ int) (hal.ADCChannel, error) {
+func (f *analog) AnalogInputPin(_ int) (hal.AnalogInputPin, error) {
 	return f, nil
+}
+
+func (f *analog) Pins(cap hal.Capability) ([]hal.Pin, error) {
+	if cap == hal.AnalogInput {
+		return []hal.Pin{f}, nil
+	}
+	return nil, fmt.Errorf("unsupported capability:%s", cap.String())
 }

@@ -39,15 +39,12 @@ func TestHS103Plug(t *testing.T) {
 		t.Error("HAL metadata should not have empty name")
 	}
 
-	d1, ok := d.(hal.OutputDriver)
-	if !ok {
-		t.Fatal("Failed to type cast to output driver")
-	}
+	d1 := d.(hal.DigitalOutputDriver)
 
-	if len(d1.OutputPins()) != 1 {
+	if len(d1.DigitalOutputPins()) != 1 {
 		t.Error("Expected exactly one output pin")
 	}
-	pin, err := d1.OutputPin(0)
+	pin, err := d1.DigitalOutputPin(0)
 	if err != nil {
 		t.Error(err)
 	}
