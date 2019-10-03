@@ -22,7 +22,7 @@ func TestHALAdapter(t *testing.T) {
 	if meta.Capabilities[0] != hal.PWM {
 		t.Error("driver didn't indicate it supports PWM")
 	}
-	if meta.Capabilities[0] != hal.DigitalOutput {
+	if meta.Capabilities[1] != hal.DigitalOutput {
 		t.Error("driver didn't indicate it supports digital output")
 	}
 	pwmDriver, ok := driver.(hal.PWMDriver)
