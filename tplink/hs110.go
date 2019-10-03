@@ -28,6 +28,9 @@ type HS110Plug struct {
 	calibrator hal.Calibrator
 }
 
+func (p *HS110Plug) Number() int {
+	return 0
+}
 func NewHS110Plug(addr string) *HS110Plug {
 	cal, _ := hal.CalibratorFactory([]hal.Measurement{})
 	return &HS110Plug{

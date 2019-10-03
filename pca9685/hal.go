@@ -23,6 +23,7 @@ type pca9685Channel struct {
 }
 
 func (c *pca9685Channel) Name() string { return fmt.Sprintf("%d", c.channel) }
+func (c *pca9685Channel) Number() int  { return c.channel }
 func (c *pca9685Channel) Close() error { return nil }
 func (c *pca9685Channel) Set(value float64) error {
 	if err := c.driver.set(c.channel, value); err != nil {

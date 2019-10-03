@@ -92,12 +92,13 @@ func (s *HS300Strip) FetchSysInfo() error {
 		return err
 	}
 	var children []*Outlet
-	for _, ch := range d.System.Sysinfo.Children {
+	for i, ch := range d.System.Sysinfo.Children {
 		o := &Outlet{
 			name:      ch.Alias,
 			id:        ch.ID,
 			addr:      s.addr,
 			cnFactory: s.cnFactory,
+			number:    i,
 		}
 		children = append(children, o)
 	}

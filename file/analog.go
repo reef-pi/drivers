@@ -57,6 +57,9 @@ func (f *analog) Name() string {
 	return f.path
 }
 
+func (f *analog) Number() int {
+	return 0
+}
 func (f *analog) Read() (float64, error) {
 	data, err := ioutil.ReadFile(f.path)
 	if err != nil {
