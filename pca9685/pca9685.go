@@ -87,12 +87,14 @@ func (p *PCA9685) SetPwm(channel int, onTime, offTime uint16) error {
 
 	// If offTime == 0, we want to be full off. Set LEDx_OFF_H(4)
 	if offTime == 0 {
-		onTime = 4095 // check with onTimne 0 and off time 4096
+		onTime = 0
+		offTime = 4096
 	}
 
 	// If offTime == 4095, we want to be full on. Set LEDx_ON_H(4)
 	if offTime == 4095 {
-		onTime = 0 // check with setting off to 0 and on to 4096
+		onTime = 4096
+		offTime = 0
 	}
 
 	// Split the ints into 4 bytes
