@@ -89,6 +89,7 @@ func (s *HS300Strip) FetchSysInfo() error {
 	}
 	var d Plug
 	if err := json.Unmarshal(buf, &d); err != nil {
+		fmt.Println(string(buf))
 		return err
 	}
 	var children []*Outlet
