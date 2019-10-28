@@ -64,7 +64,7 @@ func (s *HS300Strip) Name() string {
 	return s.meta.Name
 }
 
-func (s *HS300Strip) OutputPins() []hal.DigitalOutputPin {
+func (s *HS300Strip) DigitalOutputPins() []hal.DigitalOutputPin {
 	var pins []hal.DigitalOutputPin
 	for _, o := range s.children {
 		pins = append(pins, o)

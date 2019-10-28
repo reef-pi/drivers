@@ -2,31 +2,19 @@ package tplink
 
 import (
 	"testing"
-	"time"
 
 	"github.com/reef-pi/hal"
 )
 
-type mockConn struct {
-	Buffer []byte
-}
-
-func (c *mockConn) Close() error { return nil }
-func (c *mockConn) Read(buf []byte) (int, error) {
-	return len(buf), nil
-}
-func (c *mockConn) SetDeadline(_ time.Time) error { return nil }
-func (c *mockConn) Write(_ []byte) (int, error)   { return 0, nil }
-func mockConnFacctory(_, _ string, _ time.Duration) (Conn, error) {
-	return &mockConn{}, nil
-}
-
 func TestHS103Plug(t *testing.T) {
 	p := NewHS103Plug("127.0.0.1:9999")
-	p.cnFactory = mockConnFacctory
+	nop := NewNop()
+	nop.Buffer([]byte(`{}`))
+	p.cnFactory = nop.Factory
 	if err := p.On(); err != nil {
 		t.Error(err)
 	}
+	nop.Buffer([]byte(`{}`))
 	if err := p.Off(); err != nil {
 		t.Error(err)
 	}
