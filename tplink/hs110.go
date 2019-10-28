@@ -35,7 +35,10 @@ func NewHS110Plug(addr string) *HS110Plug {
 	cal, _ := hal.CalibratorFactory([]hal.Measurement{})
 	return &HS110Plug{
 		HS103Plug: HS103Plug{
-			addr: addr,
+			command: &cmd{
+				addr: addr,
+				cf:   TCPConnFactory,
+			},
 			meta: hal.Metadata{
 				Name:        "tplink-hs110",
 				Description: "tplink hs110 series smart plug driver with current monitoring",
@@ -43,7 +46,6 @@ func NewHS110Plug(addr string) *HS110Plug {
 					hal.DigitalOutput, hal.AnalogInput,
 				},
 			},
-			cnFactory: TCPConnFactory,
 		},
 		calibrator: cal,
 	}
@@ -58,7 +60,7 @@ func HS110HALAdapter(c []byte, _ i2c.Bus) (hal.Driver, error) {
 }
 
 func (p *HS110Plug) RTEmeter() (*Realtime, error) {
-	d, err := command(p.cnFactory, p.addr, new(EmeterCmd))
+	d, err := p.command.Execute(new(EmeterCmd), true)
 	if err != nil {
 		return nil, err
 	}
@@ -67,6 +69,10 @@ func (p *HS110Plug) RTEmeter() (*Realtime, error) {
 		return nil, err
 	}
 	return &cmd.Emeter.Realtime, nil
+}
+
+func (p *HS110Plug) SetFactory(cf ConnectionFactory) {
+	p.command.cf = cf
 }
 
 func (p *HS110Plug) AnalogInputPins() []hal.AnalogInputPin {

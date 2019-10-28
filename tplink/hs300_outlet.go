@@ -11,9 +11,8 @@ type (
 	Outlet struct {
 		name       string
 		id         string
-		addr       string
+		command    *cmd
 		state      bool
-		cnFactory  ConnectionFactory
 		calibrator hal.Calibrator
 		number     int
 	}
@@ -36,7 +35,7 @@ func (o *Outlet) Write(state bool) error {
 func (o *Outlet) RTEmeter() (*HS300Realtime, error) {
 	var cmd HS300EmeterCmd
 	cmd.Context.Children = []string{o.id}
-	d, err := command(o.cnFactory, o.addr, &cmd)
+	d, err := o.command.Execute(&cmd, true)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +53,7 @@ func (o *Outlet) On() error {
 	cmd := new(CmdRelayState)
 	cmd.System.RelayState.State = 1
 	cmd.Context.Children = []string{o.id}
-	if _, err := command(o.cnFactory, o.addr, cmd); err != nil {
+	if _, err := o.command.Execute(cmd, false); err != nil {
 		return err
 	}
 	o.state = true
@@ -64,7 +63,7 @@ func (o *Outlet) Off() error {
 	cmd := new(CmdRelayState)
 	cmd.System.RelayState.State = 0
 	cmd.Context.Children = []string{o.id}
-	if _, err := command(o.cnFactory, o.addr, cmd); err != nil {
+	if _, err := o.command.Execute(cmd, false); err != nil {
 		return err
 	}
 	o.state = true
