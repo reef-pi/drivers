@@ -1,6 +1,6 @@
 package tplink
 
-func autokeyeEncrypt(cmd []byte) []byte {
+func autokeyEncrypt(cmd []byte) []byte {
 	n := len(cmd)
 	key := byte(0xAB)
 	payload := make([]byte, n)
@@ -11,7 +11,7 @@ func autokeyeEncrypt(cmd []byte) []byte {
 	return payload
 }
 
-func autokeyeDecrypt(resp []byte) []byte {
+func autokeyDecrypt(resp []byte) []byte {
 	n := len(resp)
 	key := byte(0xAB)
 	payload := make([]byte, n)

@@ -1,6 +1,7 @@
 package tplink
 
 import (
+	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"io"
@@ -8,7 +9,10 @@ import (
 	"time"
 )
 
-const _timeOut = 5 * time.Second
+const (
+	_timeOut    = 2 * time.Second
+	_buffLength = 512
+)
 
 type Conn interface {
 	Close() error
@@ -38,7 +42,7 @@ func command(cf ConnectionFactory, addr string, cmd interface{}) ([]byte, error)
 	}
 	header := make([]byte, 4)
 	binary.BigEndian.PutUint32(header, uint32(len(payload)))
-	bs := append(header, autokeyeEncrypt(payload)...)
+	bs := append(header, autokeyEncrypt(payload)...)
 	_, err = conn.Write(bs)
 	if err != nil {
 		return nil, err
@@ -46,10 +50,12 @@ func command(cf ConnectionFactory, addr string, cmd interface{}) ([]byte, error)
 	if _, err := conn.Read(header); err != nil {
 		return nil, err
 	}
-	buf := make([]byte, 40*1024)
-	l, rErr := conn.Read(buf)
-	if rErr != nil && rErr != io.EOF {
+
+	buf := new(bytes.Buffer)
+	_, rErr := io.Copy(buf, conn)
+	resp := buf.Bytes()
+	if len(resp) == 0 && rErr != nil {
 		return nil, rErr
 	}
-	return autokeyeDecrypt(buf[0:l]), nil
+	return autokeyDecrypt(resp), nil
 }
