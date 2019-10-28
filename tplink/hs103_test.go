@@ -10,7 +10,7 @@ func TestHS103Plug(t *testing.T) {
 	p := NewHS103Plug("127.0.0.1:9999")
 	nop := NewNop()
 	nop.Buffer([]byte(`{}`))
-	p.cnFactory = nop.Factory
+	p.SetFactory(nop.Factory)
 	if err := p.On(); err != nil {
 		t.Error(err)
 	}

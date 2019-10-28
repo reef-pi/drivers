@@ -11,15 +11,13 @@ import (
 )
 
 type HS103Plug struct {
-	addr      string
-	state     bool
-	cnFactory ConnectionFactory
-	meta      hal.Metadata
+	state   bool
+	command *cmd
+	meta    hal.Metadata
 }
 
 func NewHS103Plug(addr string) *HS103Plug {
 	return &HS103Plug{
-		addr: addr,
 		meta: hal.Metadata{
 			Name:        "tplink-hs103",
 			Description: "tplink hs103 series smart plug driver",
@@ -27,16 +25,22 @@ func NewHS103Plug(addr string) *HS103Plug {
 				hal.DigitalOutput,
 			},
 		},
-		cnFactory: func(proto, addr string, t time.Duration) (Conn, error) {
-			return net.DialTimeout(proto, addr, t)
+		command: &cmd{
+			addr: addr,
+			cf: func(proto, addr string, t time.Duration) (Conn, error) {
+				return net.DialTimeout(proto, addr, t)
+			},
 		},
 	}
 }
 
+func (p *HS103Plug) SetFactory(cf ConnectionFactory) {
+	p.command.cf = cf
+}
 func (p *HS103Plug) On() error {
 	cmd := new(CmdRelayState)
 	cmd.System.RelayState.State = 1
-	if _, err := command(p.cnFactory, p.addr, cmd); err != nil {
+	if _, err := p.command.Execute(cmd, false); err != nil {
 		return err
 	}
 	p.state = true
@@ -46,7 +50,7 @@ func (p *HS103Plug) On() error {
 func (p *HS103Plug) Off() error {
 	cmd := new(CmdRelayState)
 	cmd.System.RelayState.State = 0
-	if _, err := command(p.cnFactory, p.addr, cmd); err != nil {
+	if _, err := p.command.Execute(cmd, false); err != nil {
 		return err
 	}
 	p.state = false
@@ -54,7 +58,7 @@ func (p *HS103Plug) Off() error {
 }
 
 func (p *HS103Plug) Info() (*Sysinfo, error) {
-	buf, err := command(p.cnFactory, p.addr, new(Plug))
+	buf, err := p.command.Execute(new(Plug), true)
 	if err != nil {
 		return nil, err
 	}

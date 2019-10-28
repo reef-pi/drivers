@@ -9,7 +9,7 @@ import (
 func TestHS110Plug(t *testing.T) {
 	p := NewHS110Plug("127.0.0.1:9999")
 	nop := NewNop()
-	p.cnFactory = nop.Factory
+	p.SetFactory(nop.Factory)
 	if err := p.On(); err != nil {
 		t.Error(err)
 	}

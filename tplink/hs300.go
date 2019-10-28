@@ -25,16 +25,14 @@ type (
 		ErrrCode int     `json:"err_code,omitempty"`
 	}
 	HS300Strip struct {
-		addr      string
-		cnFactory ConnectionFactory
-		meta      hal.Metadata
-		children  []*Outlet
+		meta     hal.Metadata
+		children []*Outlet
+		command  *cmd
 	}
 )
 
 func NewHS300Strip(addr string) *HS300Strip {
 	return &HS300Strip{
-		addr: addr,
 		meta: hal.Metadata{
 			Name:        "tplink-hs300",
 			Description: "tplink hs300 series smart power strip driver with current monitoring",
@@ -42,8 +40,11 @@ func NewHS300Strip(addr string) *HS300Strip {
 				hal.DigitalOutput, hal.AnalogInput,
 			},
 		},
-		cnFactory: TCPConnFactory,
-		children:  make([]*Outlet, 6),
+		command: &cmd{
+			cf:   TCPConnFactory,
+			addr: addr,
+		},
+		children: make([]*Outlet, 6),
 	}
 }
 
@@ -60,6 +61,9 @@ func (s *HS300Strip) Metadata() hal.Metadata {
 	return s.meta
 }
 
+func (s *HS300Strip) SetFactory(cf ConnectionFactory) {
+	s.command.cf = cf
+}
 func (s *HS300Strip) Name() string {
 	return s.meta.Name
 }
@@ -83,7 +87,7 @@ func (s *HS300Strip) Close() error {
 	return nil
 }
 func (s *HS300Strip) FetchSysInfo() error {
-	buf, err := command(s.cnFactory, s.addr, new(Plug))
+	buf, err := s.command.Execute(new(Plug), true)
 	if err != nil {
 		return err
 	}
@@ -95,11 +99,10 @@ func (s *HS300Strip) FetchSysInfo() error {
 	var children []*Outlet
 	for i, ch := range d.System.Sysinfo.Children {
 		o := &Outlet{
-			name:      ch.Alias,
-			id:        ch.ID,
-			addr:      s.addr,
-			cnFactory: s.cnFactory,
-			number:    i,
+			name:    ch.Alias,
+			id:      ch.ID,
+			command: s.command,
+			number:  i,
 		}
 		children = append(children, o)
 	}
