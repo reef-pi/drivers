@@ -139,12 +139,21 @@ func (p *pca9685Driver) DigitalOutputPin(n int) (hal.DigitalOutputPin, error) {
 
 // value should be within 0-100
 func (p *pca9685Driver) set(pin int, value float64) error {
-	if (value > 100) || (value < 0) {
-		return fmt.Errorf("invalid pwm range: %f, value should be within 0 to 100", value)
-	}
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	return p.hwDriver.SetPwm(pin, 0, uint16(value*40.95))
+
+	switch {
+	case value > 100:
+		return fmt.Errorf("invalid value: %f above 100", value)
+	case value < 0:
+		return fmt.Errorf("invalid value: %f below 0", value)
+	case value == 0:
+		return p.hwDriver.SetPwm(pin, 0, 4096)
+	case value == 100:
+		return p.hwDriver.SetPwm(pin, 4096, 0)
+	default:
+		return p.hwDriver.SetPwm(pin, 0, uint16(value*40.95))
+	}
 }
 
 func (p *pca9685Driver) Pins(cap hal.Capability) ([]hal.Pin, error) {

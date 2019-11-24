@@ -81,22 +81,6 @@ func (p *PCA9685) Wake() error {
 
 func (p *PCA9685) SetPwm(channel int, onTime, offTime uint16) error {
 	log.Println("onTime ", onTime, " offTime ", offTime)
-	if offTime > 4095 {
-		offTime = 4095
-	}
-
-	// If offTime == 0, we want to be full off. Set LEDx_OFF_H(4)
-	if offTime == 0 {
-		onTime = 0
-		offTime = 4096
-	}
-
-	// If offTime == 4095, we want to be full on. Set LEDx_ON_H(4)
-	if offTime == 4095 {
-		onTime = 4096
-		offTime = 0
-	}
-
 	// Split the ints into 4 bytes
 	timeReg := byte(pwm0OnLowReg + (4 * channel))
 	onTimeLow := byte(onTime & 0xFF)
