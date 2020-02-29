@@ -59,15 +59,15 @@ func (f *factory) ValidateParameters(parameters map[string]interface{}) (bool, m
 		val, ok := hal.ConvertToInt(address)
 		if !ok {
 			failure := fmt.Sprint("Address is not an integer. ", address, " was received.")
-			failures["Address"] = append(failures["Sample Parameter"], failure)
+			failures["Address"] = append(failures["Address"], failure)
 		}
 		if val < 0 || val > 255 {
 			failure := fmt.Sprint("Address is out of range. It should be between 0 and 255, but ", address, " was received.")
-			failures["Address"] = append(failures["Sample Parameter"], failure)
+			failures["Address"] = append(failures["Address"], failure)
 		}
 	} else {
 		failure := fmt.Sprint("Address is not a required parameter, but was not found.")
-		failures["Address"] = append(failures["Sample Parameter"], failure)
+		failures["Address"] = append(failures["Address"], failure)
 	}
 
 	return len(failures) == 0, failures
