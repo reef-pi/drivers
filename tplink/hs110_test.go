@@ -7,7 +7,7 @@ import (
 )
 
 func TestHS110Plug(t *testing.T) {
-	p := NewHS110Plug("127.0.0.1:9999")
+	p := newHS110Plug("127.0.0.1:9999", hal.Metadata{})
 	nop := NewNop()
 	p.SetFactory(nop.Factory)
 	if err := p.On(); err != nil {
@@ -18,7 +18,14 @@ func TestHS110Plug(t *testing.T) {
 		t.Error(err)
 	}
 
-	d, err := HS110HALAdapter([]byte(`{"address":"127.0.0.1:3000"}`), nil)
+	f := HS110Factory()
+
+	params := map[string]interface{}{
+		"Address": "http://192.168.1.5:3000",
+	}
+
+	d, err := f.NewDriver(params, nil)
+
 	if err != nil {
 		t.Error(err)
 	}

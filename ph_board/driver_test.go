@@ -8,8 +8,16 @@ import (
 	"github.com/reef-pi/rpi/i2c"
 )
 
+var params = map[string]interface{}{
+	"Address": 0x45,
+}
+
 func demo() {
-	d, _ := NewDriver([]byte(`{"address":43}`), i2c.MockBus())
+	f := Factory()
+	driver, _ := f.NewDriver(params, i2c.MockBus())
+
+	d := driver.(hal.AnalogInputDriver)
+
 	ch, _ := d.AnalogInputPin(0)
 	v, _ := ch.Read()
 	fmt.Println(v)
@@ -18,28 +26,30 @@ func demo() {
 func TestPhBoardDriver(t *testing.T) {
 	bus := i2c.MockBus()
 	bus.Bytes = make([]byte, 2)
-	_, err := HalAdapter([]byte(""), bus)
+
+	f := Factory()
+	_, err := f.NewDriver(nil, bus)
+
 	if err == nil {
 		t.Error("Adapter creation should fail when json config is invalid")
 	}
-	configJSON := `
-	{
-		"address":16
-	}
-	`
-	d, err := NewDriver([]byte(configJSON), bus)
+
+	driver, err := f.NewDriver(params, bus)
+
 	if err != nil {
 		t.Error(err)
 	}
-	if d.Metadata().Name != "ph-board" {
+	if driver.Metadata().Name != "ph-board" {
 		t.Error("Unexpected name")
 	}
-	if !d.Metadata().HasCapability(hal.AnalogInput) {
+	if !driver.Metadata().HasCapability(hal.AnalogInput) {
 		t.Error("Analog input Capability should exist")
 	}
-	if d.Metadata().HasCapability(hal.DigitalInput) {
+	if driver.Metadata().HasCapability(hal.DigitalInput) {
 		t.Error("Digital Input Capability should not exist")
 	}
+
+	d := driver.(hal.AnalogInputDriver)
 
 	if len(d.AnalogInputPins()) != 1 {
 		t.Error("Expected only one channel")

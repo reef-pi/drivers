@@ -15,12 +15,27 @@ func TestDigitalInput(t *testing.T) {
 	}
 	temp.Close()
 	defer os.Remove(temp.Name())
-	d := NewDigital(temp.Name())
+
+	params := map[string]interface{}{
+		"Path": temp.Name(),
+	}
+
+	f := DigitalFactory()
+	d, err := f.NewDriver(params, nil)
+	if err != nil {
+		t.Error(err)
+	}
+
 	meta := d.Metadata()
 	if len(meta.Capabilities) != 3 {
 		t.Error("Expected 3 capabilities, found:", len(meta.Capabilities))
 	}
-	dig := hal.DigitalInputDriver(d)
+
+	dig, ok := d.(hal.DigitalInputDriver)
+	if !ok {
+		t.Error("Failed to type cast digital file driver to digital input driver")
+	}
+
 	if len(dig.DigitalInputPins()) != 1 {
 		t.Error("Expected a single input pin, found:", len(dig.DigitalInputPins()))
 	}
@@ -43,8 +58,22 @@ func TestDigitalOutput(t *testing.T) {
 	}
 	temp.Close()
 	defer os.Remove(temp.Name())
-	d := NewDigital(temp.Name())
-	dig := hal.DigitalOutputDriver(d)
+
+	params := map[string]interface{}{
+		"Path": temp.Name(),
+	}
+
+	f := DigitalFactory()
+	d, err := f.NewDriver(params, nil)
+	if err != nil {
+		t.Error(err)
+	}
+
+	dig, ok := d.(hal.DigitalOutputDriver)
+	if !ok {
+		t.Error("Failed to type cast digital file driver to digital output driver")
+	}
+
 	pin, err := dig.DigitalOutputPin(0)
 	if err != nil {
 		t.Error(err)
@@ -61,8 +90,22 @@ func TestPWMOutput(t *testing.T) {
 	}
 	temp.Close()
 	defer os.Remove(temp.Name())
-	d := NewDigital(temp.Name())
-	dig := hal.PWMDriver(d)
+
+	params := map[string]interface{}{
+		"Path": temp.Name(),
+	}
+
+	f := DigitalFactory()
+	d, err := f.NewDriver(params, nil)
+	if err != nil {
+		t.Error(err)
+	}
+
+	dig, ok := d.(hal.PWMDriver)
+	if !ok {
+		t.Error("Failed to type cast digital file driver to digital output driver")
+	}
+
 	pin, err := dig.PWMChannel(0)
 	if err != nil {
 		t.Error(err)

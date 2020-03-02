@@ -7,7 +7,7 @@ import (
 )
 
 func TestHS103Plug(t *testing.T) {
-	p := NewHS103Plug("127.0.0.1:9999")
+	p := newHS103Plug("127.0.0.1:9999", hal.Metadata{})
 	nop := NewNop()
 	nop.Buffer([]byte(`{}`))
 	p.SetFactory(nop.Factory)
@@ -19,7 +19,14 @@ func TestHS103Plug(t *testing.T) {
 		t.Error(err)
 	}
 
-	d, err := HS103HALAdapter([]byte(`{"address":"127.0.0.1:3000"}`), nil)
+	f := HS103Factory()
+
+	params := map[string]interface{}{
+		"Address": "http://192.168.1.5:9999",
+	}
+
+	d, err := f.NewDriver(params, nil)
+
 	if err != nil {
 		t.Error(err)
 	}

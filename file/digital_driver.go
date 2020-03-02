@@ -6,9 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"encoding/json"
 	"github.com/reef-pi/hal"
-	"github.com/reef-pi/rpi/i2c"
 )
 
 type digital struct {
@@ -17,30 +15,11 @@ type digital struct {
 	lastState bool
 }
 
-func HalDigitalAdapter(c []byte, _ i2c.Bus) (hal.Driver, error) {
-	var config Config
-	if err := json.Unmarshal(c, &config); err != nil {
-		return nil, err
-	}
-	return NewDigital(config.Address), nil
-}
-
-func NewDigital(p string) *digital {
-	return &digital{
-		path: p,
-		meta: hal.Metadata{
-			Name:         "digital-file",
-			Description:  "A simple file based digital hal driver",
-			Capabilities: []hal.Capability{hal.DigitalInput, hal.DigitalOutput, hal.PWM},
-		},
-	}
-}
-
 func (f *digital) Metadata() hal.Metadata {
 	return f.meta
 }
 
-func (d *digital) Number() int {
+func (f *digital) Number() int {
 	return 0
 }
 func (f *digital) Close() error {

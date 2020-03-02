@@ -16,7 +16,7 @@ type channel struct {
 	calibrator hal.Calibrator
 }
 
-func NewChannel(b i2c.Bus, addr byte) (*channel, error) {
+func newChannel(b i2c.Bus, addr byte) (*channel, error) {
 	c, err := hal.CalibratorFactory([]hal.Measurement{})
 	if err != nil {
 		return nil, err
