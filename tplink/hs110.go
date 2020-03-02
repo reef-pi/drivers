@@ -133,7 +133,7 @@ func HS110Factory() hal.DriverFactory {
 			},
 			parameters: []hal.ConfigParameter{
 				{
-					Name:    "Address",
+					Name:    addressParam,
 					Type:    hal.String,
 					Order:   0,
 					Default: "192.168.1.11:9999",
@@ -157,15 +157,15 @@ func (f *hs110Factory) ValidateParameters(parameters map[string]interface{}) (bo
 
 	var failures = make(map[string][]string)
 
-	if v, ok := parameters["Address"]; ok {
+	if v, ok := parameters[addressParam]; ok {
 		_, ok := v.(string)
 		if !ok {
-			failure := fmt.Sprint("Address is not a string. ", v, " was received.")
-			failures["Address"] = append(failures["Address"], failure)
+			failure := fmt.Sprint(addressParam, " is not a string. ", v, " was received.")
+			failures[addressParam] = append(failures[addressParam], failure)
 		}
 	} else {
-		failure := fmt.Sprint("Address is a required parameter, but was not received.")
-		failures["Address"] = append(failures["Address"], failure)
+		failure := fmt.Sprint(addressParam, " is a required parameter, but was not received.")
+		failures[addressParam] = append(failures[addressParam], failure)
 	}
 
 	return len(failures) == 0, failures
@@ -176,7 +176,7 @@ func (f *hs110Factory) NewDriver(parameters map[string]interface{}, hardwareReso
 		return nil, errors.New(hal.ToErrorString(failures))
 	}
 
-	addr := parameters["Address"].(string)
+	addr := parameters[addressParam].(string)
 
 	return newHS110Plug(addr, f.meta), nil
 }

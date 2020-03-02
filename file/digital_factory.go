@@ -28,7 +28,7 @@ func DigitalFactory() hal.DriverFactory {
 			},
 			parameters: []hal.ConfigParameter{
 				{
-					Name:    "Path",
+					Name:    pathParam,
 					Type:    hal.String,
 					Order:   0,
 					Default: "/path/to/file",
@@ -52,19 +52,19 @@ func (f *dFactory) ValidateParameters(parameters map[string]interface{}) (bool, 
 
 	var failures = make(map[string][]string)
 
-	if v, ok := parameters["Path"]; ok {
+	if v, ok := parameters[pathParam]; ok {
 		val, ok := v.(string)
 		if !ok {
-			failure := fmt.Sprint("Path is not a string. ", v, " was received.")
-			failures["Path"] = append(failures["Path"], failure)
+			failure := fmt.Sprint(pathParam, " is not a string. ", v, " was received.")
+			failures[pathParam] = append(failures[pathParam], failure)
 		}
 		if len(val) < 1 {
-			failure := fmt.Sprint("File path not long enough to be valid. ", v, " was received.")
-			failures["Path"] = append(failures["Path"], failure)
+			failure := fmt.Sprint(pathParam, " not long enough to be valid. ", v, " was received.")
+			failures[pathParam] = append(failures[pathParam], failure)
 		}
 	} else {
-		failure := fmt.Sprint("Path is required parameter, but was not received.")
-		failures["Path"] = append(failures["Path"], failure)
+		failure := fmt.Sprint(pathParam, " is required parameter, but was not received.")
+		failures[pathParam] = append(failures[pathParam], failure)
 	}
 
 	return len(failures) == 0, failures
@@ -76,7 +76,7 @@ func (f *dFactory) NewDriver(parameters map[string]interface{}, hardwareResource
 	}
 
 	driver := &digital{
-		path: parameters["Path"].(string),
+		path: parameters[pathParam].(string),
 		meta: f.meta,
 	}
 

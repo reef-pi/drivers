@@ -10,6 +10,9 @@ import (
 	"github.com/reef-pi/rpi/i2c"
 )
 
+const addressParam = "Address"
+const freqParam = "Frequency"
+
 type pcaFactory struct {
 	meta       hal.Metadata
 	parameters []hal.ConfigParameter
@@ -32,13 +35,13 @@ func Factory() hal.DriverFactory {
 			},
 			parameters: []hal.ConfigParameter{
 				{
-					Name:    "Address",
+					Name:    addressParam,
 					Type:    hal.Integer,
 					Order:   0,
 					Default: 0x40,
 				},
 				{
-					Name:    "Frequency",
+					Name:    freqParam,
 					Type:    hal.Integer,
 					Order:   1,
 					Default: 150,
@@ -64,34 +67,34 @@ func (f *pcaFactory) ValidateParameters(parameters map[string]interface{}) (bool
 	var v interface{}
 	var ok bool
 
-	if v, ok = parameters["Address"]; ok {
+	if v, ok = parameters[addressParam]; ok {
 		val, ok := hal.ConvertToInt(v)
 		if !ok {
-			failure := fmt.Sprint("Address is not a number. ", v, " was received.")
-			failures["Address"] = append(failures["Address"], failure)
+			failure := fmt.Sprint(addressParam, " is not a number. ", v, " was received.")
+			failures[addressParam] = append(failures[addressParam], failure)
 		}
 		if val <= 0 || val >= 256 {
-			failure := fmt.Sprint("Address is out of range (1 - 255). ", v, " was received.")
-			failures["Address"] = append(failures["Address"], failure)
+			failure := fmt.Sprint(addressParam, " is out of range (1 - 255). ", v, " was received.")
+			failures[addressParam] = append(failures[addressParam], failure)
 		}
 	} else {
-		failure := fmt.Sprint("Address is required parameter, but was not received.")
-		failures["Address"] = append(failures["Address"], failure)
+		failure := fmt.Sprint(addressParam, " is required parameter, but was not received.")
+		failures[addressParam] = append(failures[addressParam], failure)
 	}
 
-	if v, ok = parameters["Frequency"]; ok {
+	if v, ok = parameters[freqParam]; ok {
 		val, ok := hal.ConvertToInt(v)
 		if !ok {
-			failure := fmt.Sprint("Frequency is not a number. ", v, " was received.")
-			failures["Frequency"] = append(failures["Frequency"], failure)
+			failure := fmt.Sprint(freqParam, " is not a number. ", v, " was received.")
+			failures[freqParam] = append(failures[freqParam], failure)
 		}
 		if val <= 0 || val > 1500 {
-			failure := fmt.Sprint("Frequency is out of range (1 - 1500). ", v, " was received.")
-			failures["Frequency"] = append(failures["Frequency"], failure)
+			failure := fmt.Sprint(freqParam, " is out of range (1 - 1500). ", v, " was received.")
+			failures[freqParam] = append(failures[freqParam], failure)
 		}
 	} else {
-		failure := fmt.Sprint("Frequency is required parameter, but was not received.")
-		failures["Frequency"] = append(failures["Frequency"], failure)
+		failure := fmt.Sprint(freqParam, " is required parameter, but was not received.")
+		failures[freqParam] = append(failures[freqParam], failure)
 	}
 
 	return len(failures) == 0, failures
@@ -102,8 +105,8 @@ func (f *pcaFactory) NewDriver(parameters map[string]interface{}, hardwareResour
 		return nil, errors.New(hal.ToErrorString(failures))
 	}
 
-	address, _ := hal.ConvertToInt(parameters["Address"])
-	frequency, _ := hal.ConvertToInt(parameters["Frequency"])
+	address, _ := hal.ConvertToInt(parameters[addressParam])
+	frequency, _ := hal.ConvertToInt(parameters[freqParam])
 
 	config := PCA9685Config{
 		Address:   address,

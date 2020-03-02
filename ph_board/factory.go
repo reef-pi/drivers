@@ -9,6 +9,8 @@ import (
 	"github.com/reef-pi/rpi/i2c"
 )
 
+const addressParam = "Address"
+
 type phFactory struct {
 	meta       hal.Metadata
 	parameters []hal.ConfigParameter
@@ -29,7 +31,7 @@ func Factory() hal.DriverFactory {
 			},
 			parameters: []hal.ConfigParameter{
 				{
-					Name:    "Address",
+					Name:    addressParam,
 					Type:    hal.Integer,
 					Order:   0,
 					Default: 0x45,
@@ -53,19 +55,19 @@ func (f *phFactory) ValidateParameters(parameters map[string]interface{}) (bool,
 
 	var failures = make(map[string][]string)
 
-	if v, ok := parameters["Address"]; ok {
+	if v, ok := parameters[addressParam]; ok {
 		val, ok := hal.ConvertToInt(v)
 		if !ok {
-			failure := fmt.Sprint("Address is not a number. ", v, " was received.")
-			failures["Address"] = append(failures["Address"], failure)
+			failure := fmt.Sprint(addressParam, " is not a number. ", v, " was received.")
+			failures[addressParam] = append(failures[addressParam], failure)
 		}
 		if val <= 0 || val >= 256 {
-			failure := fmt.Sprint("Address is out of range (1 - 255). ", v, " was received.")
-			failures["Address"] = append(failures["Address"], failure)
+			failure := fmt.Sprint(addressParam, " is out of range (1 - 255). ", v, " was received.")
+			failures[addressParam] = append(failures[addressParam], failure)
 		}
 	} else {
-		failure := fmt.Sprint("Address is a required parameter, but was not received.")
-		failures["Address"] = append(failures["Address"], failure)
+		failure := fmt.Sprint(addressParam, " is a required parameter, but was not received.")
+		failures[addressParam] = append(failures[addressParam], failure)
 	}
 
 	return len(failures) == 0, failures
@@ -76,7 +78,7 @@ func (f *phFactory) NewDriver(parameters map[string]interface{}, hardwareResourc
 		return nil, errors.New(hal.ToErrorString(failures))
 	}
 
-	address := byte(parameters["Address"].(int))
+	address := byte(parameters[addressParam].(int))
 
 	bus := hardwareResources.(i2c.Bus)
 

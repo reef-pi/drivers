@@ -15,6 +15,8 @@ type factory struct {
 	parameters []hal.ConfigParameter
 }
 
+const addressParam = "Address"
+
 var ezoFactory *factory
 var once sync.Once
 
@@ -30,7 +32,7 @@ func Factory() hal.DriverFactory {
 			},
 			parameters: []hal.ConfigParameter{
 				{
-					Name:    "Address",
+					Name:    addressParam,
 					Type:    hal.Integer,
 					Order:   0,
 					Default: 68,
@@ -55,19 +57,19 @@ func (f *factory) ValidateParameters(parameters map[string]interface{}) (bool, m
 
 	var failures = make(map[string][]string)
 
-	if address, ok := parameters["Address"]; ok {
+	if address, ok := parameters[addressParam]; ok {
 		val, ok := hal.ConvertToInt(address)
 		if !ok {
-			failure := fmt.Sprint("Address is not an integer. ", address, " was received.")
-			failures["Address"] = append(failures["Address"], failure)
+			failure := fmt.Sprint(addressParam, " is not an integer. ", address, " was received.")
+			failures[addressParam] = append(failures[addressParam], failure)
 		}
 		if val < 0 || val > 255 {
-			failure := fmt.Sprint("Address is out of range. It should be between 0 and 255, but ", address, " was received.")
-			failures["Address"] = append(failures["Address"], failure)
+			failure := fmt.Sprint(addressParam, " is out of range. It should be between 0 and 255, but ", address, " was received.")
+			failures[addressParam] = append(failures[addressParam], failure)
 		}
 	} else {
-		failure := fmt.Sprint("Address is not a required parameter, but was not found.")
-		failures["Address"] = append(failures["Address"], failure)
+		failure := fmt.Sprint(addressParam, " is not a required parameter, but was not found.")
+		failures[addressParam] = append(failures[addressParam], failure)
 	}
 
 	return len(failures) == 0, failures
@@ -78,7 +80,7 @@ func (f *factory) NewDriver(parameters map[string]interface{}, hardwareResources
 		return nil, errors.New(hal.ToErrorString(failures))
 	}
 
-	address, _ := hal.ConvertToInt(parameters["Address"])
+	address, _ := hal.ConvertToInt(parameters[addressParam])
 
 	driver := &AtlasEZO{
 		addr:  byte(address),

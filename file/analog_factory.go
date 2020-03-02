@@ -8,6 +8,8 @@ import (
 	"github.com/reef-pi/hal"
 )
 
+const pathParam = "Path"
+
 type factory struct {
 	meta       hal.Metadata
 	parameters []hal.ConfigParameter
@@ -28,7 +30,7 @@ func AnalogFactory() hal.DriverFactory {
 			},
 			parameters: []hal.ConfigParameter{
 				{
-					Name:    "Path",
+					Name:    pathParam,
 					Type:    hal.String,
 					Order:   0,
 					Default: "/path/to/file",
@@ -51,19 +53,19 @@ func (f *factory) GetParameters() []hal.ConfigParameter {
 func (f *factory) ValidateParameters(parameters map[string]interface{}) (bool, map[string][]string) {
 	var failures = make(map[string][]string)
 
-	if v, ok := parameters["Path"]; ok {
+	if v, ok := parameters[pathParam]; ok {
 		val, ok := v.(string)
 		if !ok {
-			failure := fmt.Sprint("Path is not a string. ", v, " was received.")
-			failures["Path"] = append(failures["Path"], failure)
+			failure := fmt.Sprint(pathParam, " is not a string. ", v, " was received.")
+			failures[pathParam] = append(failures[pathParam], failure)
 		}
 		if len(val) < 1 {
-			failure := fmt.Sprint("File path not long enough to be valid. ", v, " was received.")
-			failures["Path"] = append(failures["Path"], failure)
+			failure := fmt.Sprint(pathParam, " not long enough to be valid. ", v, " was received.")
+			failures[pathParam] = append(failures[pathParam], failure)
 		}
 	} else {
-		failure := fmt.Sprint("Path is required parameter, but was not received.")
-		failures["Path"] = append(failures["Path"], failure)
+		failure := fmt.Sprint(pathParam, " is required parameter, but was not received.")
+		failures[pathParam] = append(failures[pathParam], failure)
 	}
 
 	return len(failures) == 0, failures
@@ -80,7 +82,7 @@ func (f *factory) NewDriver(parameters map[string]interface{}, hardwareResources
 	}
 
 	driver := &analog{
-		path:       parameters["Path"].(string),
+		path:       parameters[pathParam].(string),
 		calibrator: c,
 		meta:       f.meta,
 	}
