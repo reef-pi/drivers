@@ -78,7 +78,8 @@ func (f *phFactory) NewDriver(parameters map[string]interface{}, hardwareResourc
 		return nil, errors.New(hal.ToErrorString(failures))
 	}
 
-	address := byte(parameters[addressParam].(int))
+	intAddress, _ := hal.ConvertToInt(parameters[addressParam])
+	address := byte(intAddress)
 
 	bus := hardwareResources.(i2c.Bus)
 

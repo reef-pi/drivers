@@ -64,3 +64,21 @@ func TestPhBoardDriver(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestFloatAddress(t *testing.T) {
+	bus := i2c.MockBus()
+	bus.Bytes = make([]byte, 2)
+
+	var floatAddress float64
+	floatAddress = 72
+	var floatparams = map[string]interface{}{
+		"Address": floatAddress,
+	}
+
+	f := Factory()
+	_, err := f.NewDriver(floatparams, bus)
+
+	if err != nil {
+		t.Error("pico_board should convert address to int before casting to byte")
+	}
+}
