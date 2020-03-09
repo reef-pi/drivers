@@ -171,7 +171,7 @@ func (f *hs103Factory) ValidateParameters(parameters map[string]interface{}) (bo
 	return len(failures) == 0, failures
 }
 
-func (f *hs103Factory) NewDriver(parameters map[string]interface{}, hardwareResources interface{}) (hal.Driver, error) {
+func (f *hs103Factory) NewDriver(parameters map[string]interface{}, _ interface{}) (hal.Driver, error) {
 	if valid, failures := f.ValidateParameters(parameters); !valid {
 		return nil, errors.New(hal.ToErrorString(failures))
 	}
