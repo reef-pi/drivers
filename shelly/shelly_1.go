@@ -1,6 +1,7 @@
 package shelly
 
 import (
+	"errors"
 	"fmt"
 	"github.com/reef-pi/hal"
 	"net/http"
@@ -55,4 +56,62 @@ func (s *Shelly1) DigitalOutputPin(pin int) (hal.DigitalOutputPin, error) {
 		return s.pins[pin], nil
 	}
 	return nil, fmt.Errorf("unknown pin:%d", pin)
+}
+
+type Shelly1Factory struct {
+	meta       hal.Metadata
+	parameters []hal.ConfigParameter
+	devMode    bool
+}
+
+func Shelly1Adapter(devMode bool) hal.DriverFactory {
+	return &Shelly1Factory{
+		meta: hal.Metadata{
+			Name:         "Shelly1",
+			Description:  "Shelly 1, single relay wifi driver",
+			Capabilities: []hal.Capability{hal.DigitalOutput},
+		},
+		parameters: []hal.ConfigParameter{
+			{
+				Name:    _addr,
+				Type:    hal.String,
+				Order:   0,
+				Default: "192.168.1.33",
+			},
+		},
+		devMode: devMode,
+	}
+}
+
+func (f *Shelly1Factory) Metadata() hal.Metadata {
+	return f.meta
+}
+func (f *Shelly1Factory) GetParameters() []hal.ConfigParameter {
+	return f.parameters
+}
+
+func (f *Shelly1Factory) ValidateParameters(parameters map[string]interface{}) (bool, map[string][]string) {
+
+	var failures = make(map[string][]string)
+
+	if v, ok := parameters[_addr]; ok {
+		_, ok := v.(string)
+		if !ok {
+			failure := fmt.Sprint(_addr, " is not a string. ", v, " was received.")
+			failures[_addr] = append(failures[_addr], failure)
+		}
+	} else {
+		failure := fmt.Sprint(_addr, " is a required parameter, but was not received.")
+		failures[_addr] = append(failures[_addr], failure)
+	}
+
+	return len(failures) == 0, failures
+}
+
+func (f *Shelly1Factory) NewDriver(params map[string]interface{}, _ interface{}) (hal.Driver, error) {
+	if valid, failures := f.ValidateParameters(params); !valid {
+		return nil, errors.New(hal.ToErrorString(failures))
+	}
+	addr := params[_addr].(string)
+	return NewShelly1(addr, f.devMode)
 }
