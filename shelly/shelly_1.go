@@ -17,7 +17,9 @@ func NewShelly1(a string, devMode bool) (hal.DigitalOutputDriver, error) {
 	var getter HTTPGetter
 	if devMode {
 		getter = func(_ string) (*http.Response, error) {
-			return new(http.Response), nil
+			resp := new(http.Response)
+			resp.StatusCode = http.StatusOK
+			return resp, nil
 		}
 	}
 

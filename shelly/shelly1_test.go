@@ -26,4 +26,7 @@ func TestShelly1(t *testing.T) {
 	if pin.LastState() != false {
 		t.Error("Expected initial state to be false")
 	}
+	if err := pin.Write(true); err != nil {
+		t.Error(err)
+	}
 }
