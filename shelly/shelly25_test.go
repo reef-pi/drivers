@@ -6,7 +6,10 @@ import (
 )
 
 func TestShelly25(t *testing.T) {
-	d, err := NewShelly25("127.0.0.1", true)
+	f := Shelly25Adapter(true)
+	params := make(map[string]interface{})
+	params[_addr] = "127.0.0.1"
+	d, err := f.NewDriver(params, nil)
 	if err != nil {
 		t.Error(err)
 	}
