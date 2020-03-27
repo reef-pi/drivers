@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	_user     = "username"
-	_password = "password"
-	_addr     = "ip"
+	_user     = "Username"
+	_password = "Password"
+	_addr     = "Address"
 )
 
 type Factory struct {
