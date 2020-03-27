@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 type Relay struct {
@@ -27,7 +28,9 @@ func (r *Relay) Write(state bool) error {
 		return err
 	}
 	req.Header.Set("X-Requested-With", "XMLHttpRequest")
-	c := http.Client{}
+	c := http.Client{
+		Timeout: 5 * time.Second,
+	}
 	resp, err := c.Do(req)
 	if err != nil {
 		return err
