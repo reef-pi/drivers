@@ -109,7 +109,7 @@ func (s *Shelly25) Pins(cap hal.Capability) ([]hal.Pin, error) {
 	case hal.DigitalOutput:
 		return []hal.Pin{s.pins[0], s.pins[1]}, nil
 	default:
-		return nil, fmt.Errorf("unspoorted capability")
+		return nil, fmt.Errorf("capability not supported")
 	}
 }
 func (s *Shelly25) DigitalOutputPins() []hal.DigitalOutputPin {
