@@ -3,7 +3,9 @@ package mp3
 import (
 	"errors"
 	"fmt"
+	"github.com/hajimehoshi/oto"
 	"github.com/reef-pi/hal"
+	"log"
 	"sync"
 )
 
@@ -94,6 +96,17 @@ func (f *factory) NewDriver(parameters map[string]interface{}, _ interface{}) (h
 
 	file := parameters[fileParam].(string)
 	loop := parameters[loopParam].(bool)
+	once.Do(func() {
+		context, err := oto.NewContext(44100, 2, 2, 8192)
+		if err == nil {
+			ctx = context
+			return
+		}
+		log.Println("ERROR: failed to initialize mp3 player context.", err)
+	})
+	if ctx == nil {
+		return nil, fmt.Errorf("mp3 player context not initialized")
+	}
 
 	return &Driver{
 		meta: f.meta,

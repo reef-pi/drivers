@@ -30,26 +30,6 @@ type Config struct {
 	File string
 }
 
-func NewMP3(c Config) (hal.DigitalOutputDriver, error) {
-	once.Do(func() {
-		context, err := oto.NewContext(44100, 2, 2, 8192)
-		if err == nil {
-			ctx = context
-			return
-		}
-		log.Println("ERROR: failed to initialize mp3 player context.", err)
-	})
-	if ctx == nil {
-		return nil, fmt.Errorf("mp3 player context not initialized")
-	}
-	return &Driver{
-		meta: hal.Metadata{
-			Name: _name,
-		},
-		conf: c,
-	}, nil
-}
-
 func (d *Driver) run(quit chan struct{}) {
 	f, err := os.Open(d.conf.File)
 	if err != nil {
