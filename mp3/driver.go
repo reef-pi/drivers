@@ -6,77 +6,150 @@ import (
 	"github.com/hajimehoshi/oto"
 	"github.com/reef-pi/hal"
 	"io"
+	"log"
 	"os"
-	"time"
+	"sync"
+)
+
+const (
+	_name = "mp3"
 )
 
 type Driver struct {
-	meta hal.Metadata
+	sync.Mutex
+	quitCh chan struct{}
+	state  bool
+	meta   hal.Metadata
+	conf   Config
 }
 
 type Config struct {
 	Loop bool
+	File string
 }
 
 func NewMP3(c Config) (hal.DigitalOutputDriver, error) {
+	return &Driver{
+		meta: hal.Metadata{
+			Name: _name,
+		},
+		conf: c,
+	}, nil
 }
 
-func run(quit chan struct{}) {
-	f, err := os.Open("/home/ranjib/Downloads/rr.mp3")
+func (d *Driver) run(quit chan struct{}) {
+	f, err := os.Open(d.conf.File)
 	if err != nil {
-		fmt.Println("ERROR:", err)
+		log.Println("ERROR: failed to open mp3 file", err)
 		return
 	}
 	defer f.Close()
 
-	d, err := mp3.NewDecoder(f)
+	dec, err := mp3.NewDecoder(f)
 	if err != nil {
-		fmt.Println("Failed to create decoder. Error:", err)
+		log.Println("ERROR: Failed to create mp3 decoder:", err)
 		return
 	}
 
-	p, err := oto.NewPlayer(d.SampleRate(), 2, 2, 8192)
+	p, err := oto.NewPlayer(dec.SampleRate(), 2, 2, 8192)
 	if err != nil {
-		fmt.Println("Failed to create player. Error:", err)
+		log.Println("ERROR: failed to create mp3 player. Error:", err)
 		return
 	}
 	defer p.Close()
-	fmt.Printf("Length: %d[bytes]\n", d.Length())
 	buf := make([]byte, 8)
-	pos := 0
-
 	for {
 		select {
 		case <-quit:
-			fmt.Println("Quitting. written bytes:", pos)
-			return
 			return
 		default:
-			n, err := d.Read(buf)
+			_, err := dec.Read(buf)
 			if err != nil {
 				if err == io.EOF {
-					fmt.Println("Last payload length:", n, "written bytes:", pos)
-					return
+					if !d.conf.Loop {
+						return
+					}
+					f.Seek(0, io.SeekStart)
+					dec, err = mp3.NewDecoder(f)
+					if err != nil {
+						log.Println("ERRPR: failed to recreate mp3 decoder:", err)
+						return
+					}
 				}
-				fmt.Println("Read ERROR:", err)
+				log.Println("ERROR: mp3 decoder read failed:", err)
 				return
 			}
 			if _, err := p.Write(buf); err != nil {
-				fmt.Println("Write ERROR:", err)
-				return
-			}
-			pos += n
-			if n != 8 {
-				fmt.Println("Last payload length:", n, "written bytes:", pos)
+				log.Println("ERROR: mp3 player write failed:", err)
 				return
 			}
 		}
 	}
 }
 
-func main() {
-	q := make(chan struct{})
-	go run(q)
-	time.Sleep(5 * time.Second)
-	q <- struct{}{}
+func (d *Driver) Metadata() hal.Metadata {
+	return d.meta
+}
+
+func (d *Driver) Name() string {
+	return d.meta.Name
+}
+
+func (d *Driver) Number() int {
+	return 0
+}
+func (d *Driver) DigitalOutputPins() []hal.DigitalOutputPin {
+	return []hal.DigitalOutputPin{d}
+}
+
+func (d *Driver) DigitalOutputPin(i int) (hal.DigitalOutputPin, error) {
+	if i != 0 {
+		return nil, fmt.Errorf("invalid pin: %d", i)
+	}
+	return d, nil
+}
+
+func (d *Driver) Write(state bool) error {
+	if state {
+		return d.On()
+	}
+	return d.Off()
+}
+func (d *Driver) On() error {
+	d.Lock()
+	defer d.Unlock()
+
+	if d.quitCh != nil {
+		return fmt.Errorf("previous invoke is still running")
+	}
+	d.quitCh = make(chan struct{})
+	go d.run(d.quitCh)
+	d.state = true
+	return nil
+}
+func (d *Driver) Off() error {
+	d.state = false
+	if d.quitCh == nil {
+		return nil
+	}
+	d.quitCh <- struct{}{}
+	close(d.quitCh)
+	d.quitCh = nil
+	return nil
+}
+
+func (d *Driver) LastState() bool {
+	return d.state
+}
+
+func (d *Driver) Close() error {
+	return nil
+}
+func (d *Driver) Pins(cap hal.Capability) ([]hal.Pin, error) {
+	switch cap {
+	case hal.DigitalOutput:
+		return []hal.Pin{d}, nil
+	default:
+		return nil, fmt.Errorf("unsupported capability:%s", cap.String())
+	}
 }
