@@ -25,6 +25,12 @@ var once sync.Once
 // Factory returns a singleton mp3 driver factory
 func Factory() hal.DriverFactory {
 	once.Do(func() {
+		context, err := oto.NewContext(44100, 2, 2, 8192)
+		if err != nil {
+			log.Println("ERROR: failed to initialize mp3 player context.", err)
+		} else {
+			ctx = context
+		}
 		f = &factory{
 			meta: hal.Metadata{
 				Name:        "mp3",
@@ -96,17 +102,6 @@ func (f *factory) NewDriver(parameters map[string]interface{}, _ interface{}) (h
 
 	file := parameters[fileParam].(string)
 	loop := parameters[loopParam].(bool)
-	once.Do(func() {
-		context, err := oto.NewContext(44100, 2, 2, 8192)
-		if err == nil {
-			ctx = context
-			return
-		}
-		log.Println("ERROR: failed to initialize mp3 player context.", err)
-	})
-	if ctx == nil {
-		return nil, fmt.Errorf("mp3 player context not initialized")
-	}
 
 	return &Driver{
 		meta: f.meta,
