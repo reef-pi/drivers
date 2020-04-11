@@ -39,7 +39,6 @@ func (d *SHT31D) read(blockCount int) ([]uint16, error) {
 		return nil, err
 	}
 	resp := make([]payload, blockCount)
-	fmt.Println("here")
 	if err := binary.Read(bytes.NewBuffer(data), binary.BigEndian, resp); err != nil {
 		return nil, err
 	}
