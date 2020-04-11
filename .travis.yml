@@ -1,6 +1,8 @@
 language: go
 go:
   - "1.13"
+before_install:
+  - sudo apt-get install libasound2-dev -y
 script:
   - go test ./...
   - go build ./...
