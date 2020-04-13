@@ -30,7 +30,7 @@ type Config struct {
 	File string
 }
 
-func (d *Driver) run(quit chan struct{}) {
+func (d *Driver) run() {
 	f, err := os.Open(d.conf.File)
 	if err != nil {
 		log.Println("ERROR: failed to open mp3 file", err)
@@ -47,30 +47,40 @@ func (d *Driver) run(quit chan struct{}) {
 	p := ctx.NewPlayer()
 	defer p.Close()
 	buf := make([]byte, 8)
+	d.quitCh = make(chan struct{})
 	for {
 		select {
-		case <-quit:
+		case <-d.quitCh:
+			close(d.quitCh)
+			d.quitCh = nil
 			return
 		default:
 			_, err := dec.Read(buf)
 			if err != nil {
 				if err == io.EOF {
 					if !d.conf.Loop {
+						close(d.quitCh)
+						d.quitCh = nil
 						return
 					}
 					f.Seek(0, io.SeekStart)
-					dec, err = mp3.NewDecoder(f)
-					if err != nil {
+					x, mErr := mp3.NewDecoder(f)
+					if mErr != nil {
 						log.Println("ERRPR: failed to recreate mp3 decoder:", err)
+						close(d.quitCh)
+						d.quitCh = nil
 						return
 					}
+					dec = x
+					continue
 				}
 				log.Println("ERROR: mp3 decoder read failed:", err)
+				close(d.quitCh)
+				d.quitCh = nil
 				return
 			}
 			if _, err := p.Write(buf); err != nil {
 				log.Println("ERROR: mp3 player write failed:", err)
-				return
 			}
 		}
 	}
@@ -114,19 +124,15 @@ func (d *Driver) On() error {
 	if d.quitCh != nil {
 		return fmt.Errorf("previous invoke is still running")
 	}
-	d.quitCh = make(chan struct{})
-	go d.run(d.quitCh)
+	go d.run()
 	d.state = true
 	return nil
 }
 func (d *Driver) Off() error {
-	d.state = false
-	if d.quitCh == nil {
-		return nil
+	if d.quitCh != nil {
+		d.quitCh <- struct{}{}
 	}
-	d.quitCh <- struct{}{}
-	close(d.quitCh)
-	d.quitCh = nil
+	d.state = false
 	return nil
 }
 
