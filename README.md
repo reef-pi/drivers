@@ -3,7 +3,7 @@
 Drivers for various ancillary hardware used in reef-pi, based on
 [reef-pi/hal](https://github.com/reef-pi/hal)
 
-[![Build Status](https://travis-ci.org/reef-pi/drivers.png?branch=master)](https://travis-ci.org/reef-pi/drivers)
+[![Build Status](https://github.com/reef-pi/drivers/workflows/go/badge.svg?branch=master)
 [![Coverage Status](https://codecov.io/gh/reef-pi/drivers/branch/master/graph/badge.svg)](https://codecov.io/gh/reef-pi/drivers)
 [![Go Report Card](https://goreportcard.com/badge/reef-pi/drivers)](https://goreportcard.com/report/reef-pi/drivers)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/reef-pi/drivers/blob/master/LICENSE.txt)

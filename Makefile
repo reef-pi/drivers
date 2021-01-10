@@ -13,3 +13,7 @@ imports:
 .PHONY: fmt
 fmt:
 	gofmt -w -s ./
+
+.PHONY: lint
+lint:
+	./build/lint.sh
