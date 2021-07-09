@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/reef-pi/hal"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -35,6 +34,8 @@ func (m *httpDriver) Number() int {
 
 func (m *httpDriver) Pins(capability hal.Capability) ([]hal.Pin, error) {
 	switch capability {
+	case hal.DigitalOutput:
+		return []hal.Pin{m}, nil
 	case hal.PWM:
 		return []hal.Pin{m}, nil
 	default:
@@ -50,12 +51,10 @@ func (m *httpDriver) PWMChannel(_ int) (hal.PWMChannel, error) {
 	return m, nil
 }
 
-
 func (m *httpDriver) LastState() bool {
 	uri := fmt.Sprintf("http://%s/cm?cmnd=Power0", m.address)
 	req, err := http.NewRequest("GET", uri, nil)
 	if err != nil {
-		log.Println(err.Error())
 		return false
 	}
 	c := http.Client{
@@ -63,13 +62,11 @@ func (m *httpDriver) LastState() bool {
 	}
 	resp, err := c.Do(req)
 	if err != nil {
-		log.Println(err.Error())
 		return false
 	}
 	defer resp.Body.Close()
 	msg, _ := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode != 200 {
-		log.Println("Tasmota: URI: ", req.URL.String(), " Http Code: ", resp.StatusCode, "Channel:", string(msg))
 		return false
 	}
 	var result map[string]interface{}
@@ -95,7 +92,6 @@ func (m *httpDriver) Set(value float64) error {
 	}
 	defer resp.Body.Close()
 	msg, _ := ioutil.ReadAll(resp.Body)
-	log.Println("Tasmota: URI: ", req.URL.String(), " Http Code: ", resp.StatusCode, "Channel:", string(msg))
 	if resp.StatusCode == 200 {
 		return nil
 	}
@@ -117,7 +113,6 @@ func (m *httpDriver) Write(b bool) error {
 	}
 	defer resp.Body.Close()
 	msg, _ := ioutil.ReadAll(resp.Body)
-	log.Println("Tasmota: URI: ", req.URL.String(), " Http Code: ", resp.StatusCode, "Channel:", string(msg))
 	if resp.StatusCode == 200 {
 		return nil
 	}
@@ -140,6 +135,8 @@ type factory struct {
 var pwmDriverFactory *factory
 var once sync.Once
 
+const address = "Domain or Address"
+
 func HttpDriverFactory() hal.DriverFactory {
 
 	once.Do(func() {
@@ -151,7 +148,7 @@ func HttpDriverFactory() hal.DriverFactory {
 			},
 			parameters: []hal.ConfigParameter{
 				{
-					Name:    "Domain or Address",
+					Name:    address,
 					Type:    hal.String,
 					Order:   0,
 					Default: "192.1.168.4",
@@ -169,7 +166,25 @@ func (f *factory) GetParameters() []hal.ConfigParameter {
 
 func (f *factory) ValidateParameters(parameters map[string]interface{}) (bool, map[string][]string) {
 	var failures = make(map[string][]string)
-	return true, failures
+
+	if v, ok := parameters[address]; ok {
+		val, ok := v.(string)
+		if !ok {
+			failure := fmt.Sprint(address, " is not a string. ", v, " was received.")
+			failures[address] = append(failures[address], failure)
+		} else if len(val) <= 0 {
+			failure := fmt.Sprint(address, " empty values are not allowed.")
+			failures[address] = append(failures[address], failure)
+		} else if len(val) >= 256 {
+			failure := fmt.Sprint(address, " size should be lower than 255 characters. ", val, " was received.")
+			failures[address] = append(failures[address], failure)
+		}
+	} else {
+		failure := fmt.Sprint(address, " is a required parameter, but was not received.")
+		failures[address] = append(failures[address], failure)
+	}
+
+	return len(failures) == 0, failures
 }
 
 func (f *factory) Metadata() hal.Metadata {
@@ -182,7 +197,7 @@ func (f *factory) NewDriver(parameters map[string]interface{}, hardwareResources
 	}
 	driver := &httpDriver{
 		meta: f.meta,
-		address: parameters["Domain Or Address"].(string),
+		address: parameters[address].(string),
 	}
 	return driver, nil
 }

@@ -5,12 +5,12 @@ import (
 	"testing"
 )
 
-func TestHttpDriver(t *testing.T) {
+func TestHttpDriver_AsDigitalOut(t *testing.T) {
 
 	f := HttpDriverFactory()
 
 	params := map[string]interface{}{
-		"Domain Or Address": "192.168.1.46",
+		"Domain or Address": "192.168.1.46",
 	}
 
 	d, err := f.NewDriver(params, nil)
@@ -37,6 +37,26 @@ func TestHttpDriver(t *testing.T) {
 		t.Error("Expected a digital output pin")
 	}
 
+}
+
+func TestHttpDriver_AsPWMDriver(t *testing.T) {
+
+	f := HttpDriverFactory()
+
+	params := map[string]interface{}{
+		"Domain or Address": "192.168.1.46",
+	}
+
+	d, err := f.NewDriver(params, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	meta := d.Metadata()
+	if len(meta.Capabilities) != 2 {
+		t.Error("Expected 1 capabilities, found:", len(meta.Capabilities))
+	}
+
 	pwm, ok := d.(hal.PWMDriver)
 	if !ok {
 		t.Error("Failed to type driver to PWM driver")
@@ -49,6 +69,48 @@ func TestHttpDriver(t *testing.T) {
 	_, err = pwm.PWMChannel(0)
 	if err != nil {
 		t.Error("Expected a pwm pin")
+	}
+
+}
+
+func TestHttpDriver_FactoryValidateParameters(t *testing.T) {
+
+	f := HttpDriverFactory()
+
+	params := map[string]interface{}{
+		"Domain or Address": "192.168.1.46",
+	}
+
+	_, err := f.NewDriver(params, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	params = map[string]interface{}{
+		"Domain or Address": "",
+	}
+
+	_, err = f.NewDriver(params, nil)
+	if err == nil {
+		t.Fatal("Expected error")
+	}
+
+	params = map[string]interface{}{
+		"Domain or Address": 1,
+	}
+
+	_, err = f.NewDriver(params, nil)
+	if err == nil {
+		t.Fatal("Expected error")
+	}
+
+	params = map[string]interface{}{
+		"Domain or Address": nil,
+	}
+
+	_, err = f.NewDriver(params, nil)
+	if err == nil {
+		t.Fatal("Expected error")
 	}
 
 }
