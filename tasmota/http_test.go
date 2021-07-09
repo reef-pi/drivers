@@ -2,15 +2,22 @@ package tasmota
 
 import (
 	"github.com/reef-pi/hal"
+	"os"
 	"testing"
 )
 
 func TestHttpDriver_AsDigitalOut(t *testing.T) {
 
+	address := os.Getenv("TASMOTA_TEST_ADDRESS")
+
+	if 	len(address) == 0 {
+		address = "192.168.1.46"
+	}
+
 	f := HttpDriverFactory()
 
 	params := map[string]interface{}{
-		"Domain or Address": "192.168.1.46",
+		"Domain or Address": address,
 	}
 
 	d, err := f.NewDriver(params, nil)
@@ -32,19 +39,56 @@ func TestHttpDriver_AsDigitalOut(t *testing.T) {
 		t.Error("Expected a single digital output pwm pin, found:", len(o.DigitalOutputPins()))
 	}
 
-	_, err = o.DigitalOutputPin(0)
-	if err != nil {
+	p, err := o.DigitalOutputPin(0)
+	if err != nil || p == nil {
 		t.Error("Expected a digital output pin")
+	}
+
+	if p.Name() != "Tasmota" {
+		t.Error("Expected Tasmota name, found: ", p.Name())
+	}
+
+	if p.Number() != 0 {
+		t.Error("Expected number 0, found: ", p.Number())
+	}
+
+	testRealDevice := os.Getenv("TASMOTA_TEST_REAL_DEVICE")
+
+	if testRealDevice == "True" {
+
+		err = p.Write(true)
+		if err != nil {
+			t.Error("Expected write true inn the digital output, error: ", err.Error())
+		}
+
+		if !p.LastState() {
+			t.Error("Expected last state is true")
+		}
+
+		err = p.Write(false)
+		if err != nil {
+			t.Error("Expected write false inn the digital output, error: ", err.Error())
+		}
+
+		if p.LastState() {
+			t.Error("Expected last state is false")
+		}
 	}
 
 }
 
 func TestHttpDriver_AsPWMDriver(t *testing.T) {
 
+	address := os.Getenv("TASMOTA_TEST_ADDRESS")
+
+	if 	len(address) == 0 {
+		address = "192.168.1.46"
+	}
+
 	f := HttpDriverFactory()
 
 	params := map[string]interface{}{
-		"Domain or Address": "192.168.1.46",
+		"Domain or Address": address,
 	}
 
 	d, err := f.NewDriver(params, nil)
