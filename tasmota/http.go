@@ -60,11 +60,7 @@ func (m *httpDriver) doRequest(url string) (*http.Response, error) {
 	c := http.Client{
 		Timeout: 5 * time.Second,
 	}
-	resp, err := c.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+	return c.Do(req)
 }
 
 func (m *httpDriver) readBody(body io.ReadCloser) ([]byte, error) {
