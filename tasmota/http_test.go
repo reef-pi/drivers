@@ -110,9 +110,40 @@ func TestHttpDriver_AsPWMDriver(t *testing.T) {
 		t.Error("Expected a single pwm channel, found:", len(pwm.PWMChannels()))
 	}
 
-	_, err = pwm.PWMChannel(0)
+	p, err := pwm.PWMChannel(0)
 	if err != nil {
 		t.Error("Expected a pwm pin")
+	}
+
+	if p.Name() != "Tasmota" {
+		t.Error("Expected Tasmota name, found: ", p.Name())
+	}
+
+	if p.Number() != 0 {
+		t.Error("Expected number 0, found: ", p.Number())
+	}
+
+	testRealDevice := os.Getenv("TASMOTA_TEST_REAL_DEVICE")
+
+	if testRealDevice == "True" {
+
+		err = p.Set(100)
+		if err != nil {
+			t.Error("Expected to set 100 in the pwm output, error: ", err.Error())
+		}
+
+		if !p.LastState() {
+			t.Error("Expected last state is true")
+		}
+
+		err = p.Set(0)
+		if err != nil {
+			t.Error("Expected to set 0 in the pwm output, error: ", err.Error())
+		}
+
+		if p.LastState() {
+			t.Error("Expected last state is false")
+		}
 	}
 
 }

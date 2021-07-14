@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/reef-pi/hal"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"sync"
@@ -51,72 +52,86 @@ func (m *httpDriver) PWMChannel(_ int) (hal.PWMChannel, error) {
 	return m, nil
 }
 
-func (m *httpDriver) LastState() bool {
-	uri := fmt.Sprintf("http://%s/cm?cmnd=Power0", m.address)
-	req, err := http.NewRequest("GET", uri, nil)
+func (m *httpDriver) doRequest(url string) (*http.Response, error) {
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		return false
+		return nil, err
 	}
 	c := http.Client{
 		Timeout: 5 * time.Second,
 	}
 	resp, err := c.Do(req)
 	if err != nil {
+		return nil, err
+	}
+	return resp, nil
+}
+
+func (m *httpDriver) readBody(body io.ReadCloser) ([]byte, error) {
+	defer body.Close()
+	msg, err := ioutil.ReadAll(body)
+	if err != nil {
+		return nil, err
+	}
+	return msg, nil
+}
+
+func (m *httpDriver) LastState() bool {
+	const urlBase = "http://%s/cm?cmnd=Power0"
+	uri := fmt.Sprintf(urlBase, m.address)
+	resp, err := m.doRequest(uri)
+	if err != nil {
 		return false
 	}
-	defer resp.Body.Close()
-	msg, _ := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode != 200 {
 		return false
 	}
-	var result map[string]interface{}
-	err = json.Unmarshal([]byte(msg), &result)
+	body, err := m.readBody(resp.Body)
 	if err != nil {
 		return false
 	}
-	return result["POWER"] == "ON"
+	var result map[string]interface{}
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return false
+	}
+	const power = "POWER"
+	const on = "ON"
+	return result[power] == on
 }
 
 func (m *httpDriver) Set(value float64) error {
-	uri := fmt.Sprintf("http://%s/cm?cmnd=Dimmer%%20%.0f", m.address, value)
-	req, err := http.NewRequest("GET", uri, nil)
+	const urlBase = "http://%s/cm?cmnd=Dimmer%%20%.0f"
+	uri := fmt.Sprintf(urlBase, m.address, value)
+	resp, err := m.doRequest(uri)
 	if err != nil {
 		return err
 	}
-	c := http.Client{
-		Timeout: 5 * time.Second,
-	}
-	resp, err := c.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	msg, _ := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode == 200 {
 		return nil
 	}
-	return fmt.Errorf("HTTP Code:%d. Body:%v", resp.StatusCode, string(msg))
+	body, err := m.readBody(resp.Body)
+	if err != nil {
+		return err
+	}
+	return fmt.Errorf("HTTP Code:%d. Body:%v", resp.StatusCode, string(body))
 }
 
 func (m *httpDriver) Write(b bool) error {
-	uri := fmt.Sprintf("http://%s/cm?cmnd=Power0%%20%t", m.address, b)
-	req, err := http.NewRequest("GET", uri, nil)
+	const baseUri = "http://%s/cm?cmnd=Power0%%20%t"
+	uri := fmt.Sprintf(baseUri, m.address, b)
+	resp, err := m.doRequest(uri)
 	if err != nil {
 		return err
 	}
-	c := http.Client{
-		Timeout: 5 * time.Second,
-	}
-	resp, err := c.Do(req)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-	msg, _ := ioutil.ReadAll(resp.Body)
 	if resp.StatusCode == 200 {
 		return nil
 	}
-	return fmt.Errorf("HTTP Code:%d. Body:%v", resp.StatusCode, string(msg))
+	body, err := m.readBody(resp.Body)
+	if err != nil {
+		return err
+	}
+	return fmt.Errorf("HTTP Code:%d. Body:%v", resp.StatusCode, string(body))
 }
 
 func (m *httpDriver) DigitalOutputPins() []hal.DigitalOutputPin {
