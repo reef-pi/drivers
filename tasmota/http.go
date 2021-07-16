@@ -146,7 +146,7 @@ type factory struct {
 var pwmDriverFactory *factory
 var once sync.Once
 
-const address = "Domain or Address"
+const address = "Address"
 
 func HttpDriverFactory() hal.DriverFactory {
 
