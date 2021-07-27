@@ -17,7 +17,7 @@ func TestHttpDriver_AsDigitalOut(t *testing.T) {
 	f := HttpDriverFactory()
 
 	params := map[string]interface{}{
-		"Domain or Address": address,
+		"Address": address,
 	}
 
 	d, err := f.NewDriver(params, nil)
@@ -88,7 +88,7 @@ func TestHttpDriver_AsPWMDriver(t *testing.T) {
 	f := HttpDriverFactory()
 
 	params := map[string]interface{}{
-		"Domain or Address": address,
+		"Address": address,
 	}
 
 	d, err := f.NewDriver(params, nil)
@@ -153,7 +153,7 @@ func TestHttpDriver_FactoryValidateParameters(t *testing.T) {
 	f := HttpDriverFactory()
 
 	params := map[string]interface{}{
-		"Domain or Address": "192.168.1.46",
+		"Address": "192.168.1.46",
 	}
 
 	_, err := f.NewDriver(params, nil)
@@ -162,7 +162,7 @@ func TestHttpDriver_FactoryValidateParameters(t *testing.T) {
 	}
 
 	params = map[string]interface{}{
-		"Domain or Address": "",
+		"Address": "",
 	}
 
 	_, err = f.NewDriver(params, nil)
@@ -171,7 +171,7 @@ func TestHttpDriver_FactoryValidateParameters(t *testing.T) {
 	}
 
 	params = map[string]interface{}{
-		"Domain or Address": 1,
+		"Address": 1,
 	}
 
 	_, err = f.NewDriver(params, nil)
@@ -180,7 +180,7 @@ func TestHttpDriver_FactoryValidateParameters(t *testing.T) {
 	}
 
 	params = map[string]interface{}{
-		"Domain or Address": nil,
+		"Address": nil,
 	}
 
 	_, err = f.NewDriver(params, nil)
