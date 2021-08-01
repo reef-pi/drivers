@@ -18,15 +18,20 @@ are not stable, and subjected to change as per reef-pi's requirement.
 
 ## Currently available drivers
 
-- PWM: PCA9685
-- LED Display: HT16k33
-- pH probe: Atlas scientific ezo ph circuit
-- ph_board: ADS1115 based pH circuits
-- pico-board: ATSAMD10 pH adapter for the blueAcro Pico board
+- Kasa hs300, hs303, hs103, hs110 smart switches and power strips
+- Digital Loggers [web power switch](https://dlidirect.com/products/new-pro-switch)
+- Tasmota based smart outlets
+- reef-pi open source ph_board: ADS1115 based pH circuits
+- PCA9685 PWM driver
+- ADS1x15 Analog to digital converter
+- Atlas Scientific ezo ph circuit
+- Blue acro pico-board: ATSAMD10 pH adapter for the blueAcro Pico board
+
+
 
 ## License
 
-Copyright:: Copyright (c) 2018 Ranjib Dey.
+Copyright:: Copyright (c) 2021 Ranjib Dey.
 License:: Apache License, Version 2.0
 
 Licensed under the Apache License, Version 2.0 (the "License");
