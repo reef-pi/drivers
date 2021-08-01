@@ -104,7 +104,7 @@ type hs303Factory struct {
 var factory303 *hs303Factory
 var hs303once sync.Once
 
-// HS303Factory returns a singleton HS300 Driver factory
+// HS303Factory returns a singleton HS303 Driver factory
 func HS303Factory() hal.DriverFactory {
 
 	hs303once.Do(func() {
