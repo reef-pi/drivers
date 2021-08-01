@@ -5,11 +5,10 @@ github.com/hajimehoshi/oto v0.6.1/go.mod h1:0QXGEkbuJRohbJaxr7ZQSxnju7hEhseiPx2h
 github.com/hajimehoshi/oto v0.7.3 h1:Shd8YYrMP0/72ZOwfnBFTvQn6Zlwah55hPrk7SeIFLk=
 github.com/hajimehoshi/oto v0.7.3/go.mod h1:wovJ8WWMfFKvP587mhHgot/MBr4DnNy9m6EepeVGnos=
 github.com/reef-pi/embd v0.0.0-20200823212911-23a8c07341dd/go.mod h1:vLR1mLVXpivVlbXyVJ4CdsUpOoyDWas+xjikOIzVV0g=
-github.com/reef-pi/hal v0.0.0-20210110194416-096527efd4a0/go.mod h1:ymcJ0AbYfWXT1vyAbXOjKtWaFdCv1HHYmXDMWxJSWSM=
-github.com/reef-pi/hal v0.0.0-20210710185857-8eb35220aca0 h1:MRner0mCvYieEzCRJDeC4oMrVWK64GGRaU3lexmCYWY=
-github.com/reef-pi/hal v0.0.0-20210710185857-8eb35220aca0/go.mod h1:ymcJ0AbYfWXT1vyAbXOjKtWaFdCv1HHYmXDMWxJSWSM=
-github.com/reef-pi/rpi v0.0.0-20210710185807-7b552751ba13 h1:LIIG0DRmMolRxBwI/QWzXvxwAXnjmDcLDvV4Qelv3NI=
-github.com/reef-pi/rpi v0.0.0-20210710185807-7b552751ba13/go.mod h1:0ImA3B1k35IPcvsCgy5P7mLmtMqsqAp51suORfbE6qY=
+github.com/reef-pi/hal v0.0.0-20210801213209-e1fdd03d558f h1:pab1cY2bLxj2HJBRPuq7lbS+Z5D/NjGpuRHip7PqRMs=
+github.com/reef-pi/hal v0.0.0-20210801213209-e1fdd03d558f/go.mod h1:ymcJ0AbYfWXT1vyAbXOjKtWaFdCv1HHYmXDMWxJSWSM=
+github.com/reef-pi/rpi v0.0.0-20210801215232-95fff2a103fa h1:5E3TBLDtbk2YONg0xuBlFrE0+dBuwkoO9z2lp7EDmYs=
+github.com/reef-pi/rpi v0.0.0-20210801215232-95fff2a103fa/go.mod h1:5Zu8vYYKAJshaEh2WdVxsNXp1O6U6kTSvAMMAYmGjJQ=
 golang.org/x/exp v0.0.0-20190306152737-a1d7652674e8 h1:idBdZTd9UioThJp8KpM/rTSinK/ChZFBE43/WtIy8zg=
 golang.org/x/exp v0.0.0-20190306152737-a1d7652674e8/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/image v0.0.0-20190227222117-0694c2d4d067 h1:KYGJGHOQy8oSi1fDlSpcZF0+juKwk/hEMv5SiwHogR0=
