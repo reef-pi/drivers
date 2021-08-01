@@ -107,7 +107,7 @@ var hs303once sync.Once
 // HS303Factory returns a singleton HS300 Driver factory
 func HS303Factory() hal.DriverFactory {
 
-	hs300once.Do(func() {
+	hs303once.Do(func() {
 		factory303 = &hs303Factory{
 			meta: hal.Metadata{
 				Name:        "tplink-hs303",
