@@ -28,6 +28,7 @@ func (r *Relay) Write(state bool) error {
 		return err
 	}
 	req.Header.Set("X-Requested-With", "XMLHttpRequest")
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	c := http.Client{
 		Timeout: 5 * time.Second,
 	}

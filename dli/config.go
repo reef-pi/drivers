@@ -16,15 +16,17 @@ type Config struct {
 }
 
 func (c Config) setDigestAuth(r *http.Request, resp *http.Response) {
-	header := resp.Header.Get("www-authenticate")
-	parts := strings.SplitN(header, " ", 2)
-	parts = strings.Split(parts[1], ", ")
+	headers := resp.Header["Www-Authenticate"]
 	opts := make(map[string]string)
-	for _, part := range parts {
-		vals := strings.SplitN(part, "=", 2)
-		key := vals[0]
-		val := strings.Trim(vals[1], "\",")
-		opts[key] = val
+	for _, header := range headers {
+		parts2 := strings.SplitN(header, " ", 2)
+		parts2 = strings.Split(parts2[1], ", ")
+		for _, part := range parts2 {
+			vals := strings.SplitN(part, "=", 2)
+			key := vals[0]
+			val := strings.Trim(vals[1], "\",")
+			opts[key] = val
+		}
 	}
 	realm := opts["realm"]
 	nonce := opts["nonce"]
