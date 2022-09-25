@@ -57,7 +57,7 @@ func (c *channel) Calibrate(points []hal.Measurement) error {
 	return nil
 }
 
-func (c *channel) Read() (float64, error) {
+func (c *channel) Value() (float64, error) {
 
 	var config uint16 = configOsSingle |
 		configModeSingle |
@@ -88,7 +88,7 @@ func (c *channel) Read() (float64, error) {
 }
 
 func (c *channel) Measure() (float64, error) {
-	v, err := c.Read()
+	v, err := c.Value()
 	if err != nil {
 		return 0, err
 	}

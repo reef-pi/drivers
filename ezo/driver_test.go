@@ -29,11 +29,11 @@ func TestEZO(t *testing.T) {
 
 	e.delay = 0
 	bus.Bytes = append([]byte{1}, []byte("9.65")...)
-	if _, err := e.Read(); err != nil {
+	if _, err := e.Value(); err != nil {
 		t.Error(err)
 	}
 	bus.Bytes = append([]byte{0}, []byte("9.65")...)
-	if _, err := e.Read(); err == nil {
+	if _, err := e.Value(); err == nil {
 		t.Error("Values starting with 0 should fail")
 	}
 

@@ -44,7 +44,7 @@ func TestAnalogInput(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if _, err := pin.Read(); err != nil {
+	if _, err := pin.Value(); err != nil {
 		t.Error(err)
 	}
 }

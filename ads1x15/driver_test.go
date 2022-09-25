@@ -103,7 +103,7 @@ func TestAds1015Driver(t *testing.T) {
 		t.Error("Unexpected channel name")
 	}
 
-	_, err = ch.Read()
+	_, err = ch.Value()
 	if err == nil {
 		t.Error("Read should fail due to config mismatch")
 	}
@@ -111,7 +111,7 @@ func TestAds1015Driver(t *testing.T) {
 	//Set i2c bytes to config and reading 193, 131
 	bus.Bytes = []byte{0xC1, 0x83, 0x6F, 0xF0}
 
-	v, err := ch.Read()
+	v, err := ch.Value()
 	if err != nil {
 		t.Error(err)
 	}
@@ -194,7 +194,7 @@ func TestAds1115Driver(t *testing.T) {
 		t.Error("Unexpected channel name")
 	}
 
-	_, err = ch.Read()
+	_, err = ch.Value()
 	if err == nil {
 		t.Error("Read should fail due to config mismatch")
 	}
@@ -202,7 +202,7 @@ func TestAds1115Driver(t *testing.T) {
 	//Set i2c bytes to config and reading 193, 131
 	bus.Bytes = []byte{0xC1, 0x83, 0x6F, 0xF0}
 
-	v, err := ch.Read()
+	v, err := ch.Value()
 	if err != nil {
 		t.Error(err)
 	}

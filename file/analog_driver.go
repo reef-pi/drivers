@@ -31,7 +31,7 @@ func (f *analog) Number() int {
 	return 0
 }
 
-func (f *analog) Read() (float64, error) {
+func (f *analog) Value() (float64, error) {
 	data, err := ioutil.ReadFile(f.path)
 	if err != nil {
 		return 0, err
@@ -40,7 +40,7 @@ func (f *analog) Read() (float64, error) {
 }
 
 func (f *analog) Measure() (float64, error) {
-	v, err := f.Read()
+	v, err := f.Value()
 	if err != nil {
 		return 0, err
 	}
