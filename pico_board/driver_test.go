@@ -53,7 +53,7 @@ func TestPhBoardDriver(t *testing.T) {
 	if ch.Name() != "0" {
 		t.Error("Unexpected channel name")
 	}
-	v, err := ch.Read()
+	v, err := ch.Value()
 	if err != nil {
 		t.Error(err)
 	}

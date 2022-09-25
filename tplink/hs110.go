@@ -75,7 +75,7 @@ func (p *HS110Plug) AnalogInputPin(i int) (hal.AnalogInputPin, error) {
 	return p, nil
 }
 
-func (p *HS110Plug) Read() (float64, error) {
+func (p *HS110Plug) Value() (float64, error) {
 	em, err := p.RTEmeter()
 	if err != nil {
 		return 0, err
@@ -92,7 +92,7 @@ func (p *HS110Plug) Calibrate(points []hal.Measurement) error {
 	return nil
 }
 func (p *HS110Plug) Measure() (float64, error) {
-	v, err := p.Read()
+	v, err := p.Value()
 	if err != nil {
 		return 0, err
 	}

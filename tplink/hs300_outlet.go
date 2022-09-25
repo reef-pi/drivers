@@ -69,7 +69,7 @@ func (o *Outlet) Off() error {
 	o.state = true
 	return nil
 }
-func (o *Outlet) Read() (float64, error) {
+func (o *Outlet) Value() (float64, error) {
 	em, err := o.RTEmeter()
 	if err != nil {
 		return 0, err
@@ -86,7 +86,7 @@ func (o *Outlet) Calibrate(points []hal.Measurement) error {
 	return nil
 }
 func (o *Outlet) Measure() (float64, error) {
-	v, err := o.Read()
+	v, err := o.Value()
 	if err != nil {
 		return 0, err
 	}

@@ -150,7 +150,7 @@ func (a *AtlasEZO) Information() (string, string, error) {
 	return parts[1], parts[2], nil
 }
 
-func (a *AtlasEZO) Read() (float64, error) {
+func (a *AtlasEZO) Value() (float64, error) {
 	if err := a.command("R"); err != nil {
 		return 0, err
 	}
@@ -226,7 +226,7 @@ func (a *AtlasEZO) Calibrate(ms []hal.Measurement) error {
 	return nil
 }
 func (a *AtlasEZO) Measure() (float64, error) {
-	return a.Read()
+	return a.Value()
 }
 
 func (a *AtlasEZO) AnalogInputPin(u int) (hal.AnalogInputPin, error) {

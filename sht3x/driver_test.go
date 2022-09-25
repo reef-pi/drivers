@@ -54,7 +54,7 @@ func TestDriver(t *testing.T) {
 		t.Error("Unexpected channel name")
 	}
 	bus.Bytes = []byte{0x60, 0xc4, 0x57, 0x7f, 0x15, 0x95}
-	v, err := ch.Read()
+	v, err := ch.Value()
 	if err != nil {
 		t.Error(err)
 	}

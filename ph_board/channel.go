@@ -44,7 +44,7 @@ func (c *channel) Calibrate(points []hal.Measurement) error {
 	return nil
 }
 
-func (c *channel) Read() (float64, error) {
+func (c *channel) Value() (float64, error) {
 	if err := c.bus.WriteBytes(c.addr, []byte{0x10}); err != nil {
 		return math.NaN(), err
 	}
@@ -57,7 +57,7 @@ func (c *channel) Read() (float64, error) {
 }
 
 func (c *channel) Measure() (float64, error) {
-	v, err := c.Read()
+	v, err := c.Value()
 	if err != nil {
 		return 0, err
 	}

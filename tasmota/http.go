@@ -207,7 +207,7 @@ func (f *factory) NewDriver(parameters map[string]interface{}, hardwareResources
 		return nil, errors.New(hal.ToErrorString(failures))
 	}
 	driver := &httpDriver{
-		meta: f.meta,
+		meta:    f.meta,
 		address: parameters[address].(string),
 	}
 	return driver, nil
