@@ -118,7 +118,7 @@ func (p *pin) Write(b bool) error {
 	}
 	action := "off"
 	if b {
-		action = "off"
+		action = "on"
 	}
 	baseUri := "http://%s/outlets/%d/%s"
 	uri := fmt.Sprintf(baseUri, p.address, p.number, action)
