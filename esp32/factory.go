@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/reef-pi/hal"
+	"net/http"
 	"strconv"
 	"strings"
 	"sync"
@@ -12,18 +13,23 @@ import (
 type factory struct {
 	meta       hal.Metadata
 	parameters []hal.ConfigParameter
+	client     HTTPClient
 }
 
 var esp32DriverFactory *factory
 var once sync.Once
 
 const Address = "Address"
-const PWMPins = "PWM Pins"
 
 func Factory() hal.DriverFactory {
+	client := http.Client{Timeout: _timeout}
+	return FactoryWithClient(client.Do)
+}
+func FactoryWithClient(c HTTPClient) hal.DriverFactory {
 
 	once.Do(func() {
 		esp32DriverFactory = &factory{
+			client: c,
 			meta: hal.Metadata{
 				Name:        "reef-pi ESP32 driver",
 				Description: "Simple HTTP based full featured HAL driver for reef-pi",
@@ -42,7 +48,7 @@ func Factory() hal.DriverFactory {
 					Default: "192.1.168.4",
 				},
 				{
-					Name:    PWMPins,
+					Name:    hal.PWM.String(),
 					Type:    hal.String,
 					Order:   1,
 					Default: "",
@@ -96,23 +102,23 @@ func (f *factory) ValidateParameters(parameters map[string]interface{}) (bool, m
 		failure := fmt.Sprint(Address, " is a required parameter, but was not received.")
 		failures[Address] = append(failures[Address], failure)
 	}
-	for _, cap := range []hal.Capability{hal.DigitalOutput, hal.DigitalInput, hal.PWM, hal.AnalogInput} {
-		if v, ok := parameters[cap.String()]; ok {
+	for _, c := range []hal.Capability{hal.DigitalOutput, hal.DigitalInput, hal.PWM, hal.AnalogInput} {
+		if v, ok := parameters[c.String()]; ok {
 			val, ok := v.(string)
 			if !ok {
-				failure := fmt.Sprint(cap, " is not a string. ", parameters[cap.String()], " was received.")
-				failures[cap.String()] = append(failures[cap.String()], failure)
+				failure := fmt.Sprint(c, " is not a string. ", parameters[c.String()], " was received.")
+				failures[c.String()] = append(failures[c.String()], failure)
 			}
 			if val != "" {
 				sPins := strings.Split(val, ",")
 				for _, s := range sPins {
 					i, err := strconv.Atoi(s)
 					if err != nil {
-						failures[cap.String()] = append(failures[cap.String()], fmt.Sprint(cap, " pin", s, " is not an integer"))
+						failures[c.String()] = append(failures[c.String()], fmt.Sprint(c, " pin", s, " is not an integer"))
 					}
 					_, ok := pins[i]
 					if ok {
-						failures[cap.String()] = append(failures[cap.String()], fmt.Sprint(cap, " pin", s, " is already in use"))
+						failures[c.String()] = append(failures[c.String()], fmt.Sprint(c, " pin", s, " is already in use"))
 					}
 					pins[i] = struct{}{}
 				}
@@ -153,5 +159,6 @@ func (f *factory) NewDriver(parameters map[string]interface{}, hardwareResources
 		meta:    f.meta,
 		address: parameters[Address].(string),
 		pins:    pins,
+		client:  f.client,
 	}, nil
 }
