@@ -4,17 +4,11 @@ import (
 	"bytes"
 	"github.com/reef-pi/hal"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"testing"
 )
 
 func NopClient(r *http.Request) (*http.Response, error) {
-	body := ""
-	if r.Body != nil {
-		b, _ := ioutil.ReadAll(r.Body)
-		body = string(b)
-	}
 	resp := new(http.Response)
 	resp.Body = io.NopCloser(bytes.NewBuffer([]byte("2")))
 	resp.StatusCode = 200
