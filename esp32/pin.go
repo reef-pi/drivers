@@ -15,6 +15,8 @@ var _notImplemented = errors.New("not implemented")
 
 const _true = "true"
 
+var ErrIncompatibleCapability = errors.New("incompatible capability")
+
 type pin struct {
 	address string
 	number  int
@@ -59,7 +61,7 @@ func (p *pin) readBody(body io.ReadCloser) ([]byte, error) {
 }
 
 func (p *pin) LastState() bool {
-	baseUri := "http://%s/outlet/%d"
+	baseUri := "http://%s/outlets/%d"
 	uri := fmt.Sprintf(baseUri, p.address, p.number)
 	resp, err := p.doRequest(http.MethodGet, uri, nil)
 	if err != nil {
@@ -85,7 +87,14 @@ func mapTo255String(f float64) string {
 	return strconv.Itoa(int(f * 255 / 100))
 }
 
+func (p *pin) incompatibleCapability() error {
+	return fmt.Errorf("%w. supported capability:%s", ErrIncompatibleCapability, p.cap.String())
+}
+
 func (p *pin) Set(v float64) error {
+	if p.cap != hal.PWM {
+		return p.incompatibleCapability()
+	}
 	baseUri := "http://%s/jacks/%d"
 	uri := fmt.Sprintf(baseUri, p.address, p.number)
 	resp, err := p.doRequest(http.MethodPost, uri, strings.NewReader(mapTo255String(v)))
@@ -104,11 +113,14 @@ func (p *pin) Set(v float64) error {
 }
 
 func (p *pin) Write(b bool) error {
+	if p.cap != hal.DigitalOutput {
+		return p.incompatibleCapability()
+	}
 	action := "off"
 	if b {
-		action = "off"
+		action = "on"
 	}
-	baseUri := "http://%s/outlet/%d/%s"
+	baseUri := "http://%s/outlets/%d/%s"
 	uri := fmt.Sprintf(baseUri, p.address, p.number, action)
 	resp, err := p.doRequest(http.MethodPost, uri, nil)
 	if err != nil {
@@ -125,7 +137,10 @@ func (p *pin) Write(b bool) error {
 }
 
 func (p *pin) Read() (bool, error) {
-	baseUri := "http://%s/inlet/%d"
+	if p.cap != hal.DigitalInput {
+		return false, p.incompatibleCapability()
+	}
+	baseUri := "http://%s/inlets/%d"
 	uri := fmt.Sprintf(baseUri, p.address, p.number)
 	resp, err := p.doRequest(http.MethodGet, uri, nil)
 	if err != nil {
@@ -140,7 +155,11 @@ func (p *pin) Read() (bool, error) {
 	}
 	return strings.ToLower(strings.TrimSpace(string(body))) == _true, nil
 }
+
 func (p *pin) Value() (float64, error) {
+	if p.cap != hal.AnalogInput {
+		return 0, p.incompatibleCapability()
+	}
 	baseUri := "http://%s/analog_inputs/%d"
 	uri := fmt.Sprintf(baseUri, p.address, p.number)
 	resp, err := p.doRequest(http.MethodGet, uri, nil)
