@@ -21,6 +21,10 @@ var once sync.Once
 
 const Address = "Address"
 
+func cap2string(c hal.Capability) string {
+	return strings.Title(c.String())
+}
+
 func Factory() hal.DriverFactory {
 	client := http.Client{Timeout: _timeout}
 	return FactoryWithClient(client.Do)
@@ -103,7 +107,7 @@ func (f *factory) ValidateParameters(parameters map[string]interface{}) (bool, m
 		failures[Address] = append(failures[Address], failure)
 	}
 	for _, c := range []hal.Capability{hal.DigitalOutput, hal.DigitalInput, hal.PWM, hal.AnalogInput} {
-		if v, ok := parameters[string.Title(c.String())]; ok {
+		if v, ok := parameters[cap2string(c)]; ok {
 			val, ok := v.(string)
 
 			if !ok {
@@ -138,20 +142,20 @@ func (f *factory) NewDriver(parameters map[string]interface{}, hardwareResources
 		return nil, errors.New(hal.ToErrorString(failures))
 	}
 	pins := make(map[hal.Capability][]int)
-	for _, cap := range []hal.Capability{hal.DigitalOutput, hal.DigitalInput, hal.PWM, hal.AnalogInput} {
-		if v, ok := parameters[cap.String()]; ok {
+	for _, c := range []hal.Capability{hal.DigitalOutput, hal.DigitalInput, hal.PWM, hal.AnalogInput} {
+		if v, ok := parameters[cap2string(c)]; ok {
 			val, ok := v.(string)
 			if !ok {
-				return nil, fmt.Errorf("failed to type cast '%s' parameter value '%v' as string", cap, v)
+				return nil, fmt.Errorf("failed to type cast '%s' parameter value '%v' as string", c, v)
 			}
 			if val != "" {
 				sPins := strings.Split(val, ",")
 				for _, s := range sPins {
 					i, err := strconv.Atoi(s)
 					if err != nil {
-						return nil, fmt.Errorf("failed to convert '%s' pin '%v' to integrer. Error:%w", cap, s, err)
+						return nil, fmt.Errorf("failed to convert '%s' pin '%v' to integrer. Error:%w", c, s, err)
 					}
-					pins[cap] = append(pins[cap], i)
+					pins[c] = append(pins[c], i)
 				}
 			}
 		}

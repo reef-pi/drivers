@@ -19,10 +19,10 @@ func TestESP32Driver(t *testing.T) {
 	f := FactoryWithClient(NopClient)
 	params := map[string]interface{}{
 		"Address":        "192.168.86.2",
-		"digital-output": "2,3",
-		"digital-input":  "1,4",
-		"analog-input":   "6,7",
-		"pwm":            "10",
+		"Digital-Output": "2,3",
+		"Digital-Input":  "1,4",
+		"Analog-Input":   "6,7",
+		"Pwm":            "10",
 	}
 
 	d, err := f.NewDriver(params, nil)
