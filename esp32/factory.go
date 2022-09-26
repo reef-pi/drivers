@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/reef-pi/hal"
 	"net/http"
-	"strconv"
 	"strings"
 	"sync"
 )
@@ -88,7 +87,6 @@ func (f *factory) GetParameters() []hal.ConfigParameter {
 
 func (f *factory) ValidateParameters(parameters map[string]interface{}) (bool, map[string][]string) {
 	var failures = make(map[string][]string)
-	pins := make(map[int]struct{})
 
 	if v, ok := parameters[Address]; ok {
 		val, ok := v.(string)
@@ -108,25 +106,14 @@ func (f *factory) ValidateParameters(parameters map[string]interface{}) (bool, m
 	}
 	for _, c := range []hal.Capability{hal.DigitalOutput, hal.DigitalInput, hal.PWM, hal.AnalogInput} {
 		if v, ok := parameters[cap2string(c)]; ok {
-			val, ok := v.(string)
+			val, ok := v.(int)
 
 			if !ok {
-				failure := fmt.Sprint(c, " is not a string. ", parameters[c.String()], " was received.")
-				failures[c.String()] = append(failures[c.String()], failure)
+				failure := fmt.Sprint(c, " is not an integer. ", parameters[cap2string(c)], " was received.")
+				failures[cap2string(c)] = append(failures[cap2string(c)], failure)
 			}
-			if val != "" {
-				sPins := strings.Split(val, ",")
-				for _, s := range sPins {
-					i, err := strconv.Atoi(s)
-					if err != nil {
-						failures[c.String()] = append(failures[c.String()], fmt.Sprint(c, " pin", s, " is not an integer"))
-					}
-					_, ok := pins[i]
-					if ok {
-						failures[c.String()] = append(failures[c.String()], fmt.Sprint(c, " pin", s, " is already in use"))
-					}
-					pins[i] = struct{}{}
-				}
+			if val <= 0 {
+				failures[cap2string(c)] = append(failures[cap2string(c)], fmt.Sprint(c, " pin count should be above zero. Provided:%d", val))
 			}
 		}
 	}
@@ -144,19 +131,12 @@ func (f *factory) NewDriver(parameters map[string]interface{}, hardwareResources
 	pins := make(map[hal.Capability][]int)
 	for _, c := range []hal.Capability{hal.DigitalOutput, hal.DigitalInput, hal.PWM, hal.AnalogInput} {
 		if v, ok := parameters[cap2string(c)]; ok {
-			val, ok := v.(string)
+			val, ok := v.(int)
 			if !ok {
-				return nil, fmt.Errorf("failed to type cast '%s' parameter value '%v' as string", c, v)
+				return nil, fmt.Errorf("failed to type cast '%s' parameter value '%v' as integer", c, v)
 			}
-			if val != "" {
-				sPins := strings.Split(val, ",")
-				for _, s := range sPins {
-					i, err := strconv.Atoi(s)
-					if err != nil {
-						return nil, fmt.Errorf("failed to convert '%s' pin '%v' to integrer. Error:%w", c, s, err)
-					}
-					pins[c] = append(pins[c], i)
-				}
+			for i := 0; i < val; i++ {
+				pins[c] = append(pins[c], i)
 			}
 		}
 	}
