@@ -103,8 +103,9 @@ func (f *factory) ValidateParameters(parameters map[string]interface{}) (bool, m
 		failures[Address] = append(failures[Address], failure)
 	}
 	for _, c := range []hal.Capability{hal.DigitalOutput, hal.DigitalInput, hal.PWM, hal.AnalogInput} {
-		if v, ok := parameters[c.String()]; ok {
+		if v, ok := parameters[string.Title(c.String())]; ok {
 			val, ok := v.(string)
+
 			if !ok {
 				failure := fmt.Sprint(c, " is not a string. ", parameters[c.String()], " was received.")
 				failures[c.String()] = append(failures[c.String()], failure)
