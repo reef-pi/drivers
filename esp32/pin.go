@@ -61,30 +61,17 @@ func (p *pin) readBody(body io.ReadCloser) ([]byte, error) {
 }
 
 func (p *pin) LastState() bool {
-	baseUri := "http://%s/outlets/%d"
-	uri := fmt.Sprintf(baseUri, p.address, p.number)
-	resp, err := p.doRequest(http.MethodGet, uri, nil)
-	if err != nil {
-		return false
-	}
-	if resp.StatusCode != 200 {
-		return false
-	}
-	_, err = p.readBody(resp.Body)
-	if err != nil {
-		return false
-	}
-	return true
+	return false
 }
 
-func mapTo255String(f float64) string {
+func mapTo255String(f float64) int {
 	if f < 0 {
 		f = 0
 	}
 	if f > 100 {
 		f = 100
 	}
-	return strconv.Itoa(int(f * 255 / 100))
+	return int(f * 255 / 100)
 }
 
 func (p *pin) incompatibleCapability() error {
@@ -95,10 +82,9 @@ func (p *pin) Set(v float64) error {
 	if p.cap != hal.PWM {
 		return p.incompatibleCapability()
 	}
-	baseUri := "http://%s/jacks/%d"
-	uri := fmt.Sprintf(baseUri, p.address, p.number)
-	resp, err := p.doRequest(http.MethodPost, uri, strings.NewReader(mapTo255String(v)))
-
+	baseUri := "http://%s/jacks/%d/%d"
+	uri := fmt.Sprintf(baseUri, p.address, p.number, mapTo255String(v))
+	resp, err := p.doRequest(http.MethodPost, uri, nil)
 	if err != nil {
 		return err
 	}
