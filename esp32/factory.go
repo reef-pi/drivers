@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/reef-pi/hal"
 	"net/http"
-	"strconv"
 	"strings"
 	"sync"
 )
@@ -20,6 +19,10 @@ var esp32DriverFactory *factory
 var once sync.Once
 
 const Address = "Address"
+
+func cap2string(c hal.Capability) string {
+	return strings.Title(c.String())
+}
 
 func Factory() hal.DriverFactory {
 	client := http.Client{Timeout: _timeout}
@@ -48,28 +51,28 @@ func FactoryWithClient(c HTTPClient) hal.DriverFactory {
 					Default: "192.1.168.4",
 				},
 				{
-					Name:    hal.PWM.String(),
-					Type:    hal.String,
+					Name:    cap2string(hal.DigitalOutput),
+					Type:    hal.Integer,
 					Order:   1,
-					Default: "",
+					Default: 6,
 				},
 				{
-					Name:    hal.DigitalOutput.String(),
-					Type:    hal.String,
+					Name:    cap2string(hal.DigitalInput),
+					Type:    hal.Integer,
 					Order:   2,
-					Default: "",
+					Default: 4,
 				},
 				{
-					Name:    hal.DigitalInput.String(),
-					Type:    hal.String,
+					Name:    cap2string(hal.PWM),
+					Type:    hal.Integer,
 					Order:   3,
-					Default: "",
+					Default: 4,
 				},
 				{
-					Name:    hal.AnalogInput.String(),
-					Type:    hal.String,
+					Name:    cap2string(hal.AnalogInput),
+					Type:    hal.Integer,
 					Order:   4,
-					Default: "",
+					Default: 2,
 				},
 			},
 		}
@@ -84,7 +87,6 @@ func (f *factory) GetParameters() []hal.ConfigParameter {
 
 func (f *factory) ValidateParameters(parameters map[string]interface{}) (bool, map[string][]string) {
 	var failures = make(map[string][]string)
-	pins := make(map[int]struct{})
 
 	if v, ok := parameters[Address]; ok {
 		val, ok := v.(string)
@@ -103,25 +105,14 @@ func (f *factory) ValidateParameters(parameters map[string]interface{}) (bool, m
 		failures[Address] = append(failures[Address], failure)
 	}
 	for _, c := range []hal.Capability{hal.DigitalOutput, hal.DigitalInput, hal.PWM, hal.AnalogInput} {
-		if v, ok := parameters[c.String()]; ok {
-			val, ok := v.(string)
-			if !ok {
-				failure := fmt.Sprint(c, " is not a string. ", parameters[c.String()], " was received.")
-				failures[c.String()] = append(failures[c.String()], failure)
+		if v, ok := parameters[cap2string(c)]; ok {
+			val, converted := hal.ConvertToInt(v)
+			if !converted {
+				failure := fmt.Sprint(c, " is not an integer. ", parameters[cap2string(c)], " was received")
+				failures[cap2string(c)] = append(failures[cap2string(c)], failure)
 			}
-			if val != "" {
-				sPins := strings.Split(val, ",")
-				for _, s := range sPins {
-					i, err := strconv.Atoi(s)
-					if err != nil {
-						failures[c.String()] = append(failures[c.String()], fmt.Sprint(c, " pin", s, " is not an integer"))
-					}
-					_, ok := pins[i]
-					if ok {
-						failures[c.String()] = append(failures[c.String()], fmt.Sprint(c, " pin", s, " is already in use"))
-					}
-					pins[i] = struct{}{}
-				}
+			if val <= 0 {
+				failures[cap2string(c)] = append(failures[cap2string(c)], fmt.Sprint(c, " pin count should be above zero. Provided:%d", val))
 			}
 		}
 	}
@@ -137,21 +128,14 @@ func (f *factory) NewDriver(parameters map[string]interface{}, hardwareResources
 		return nil, errors.New(hal.ToErrorString(failures))
 	}
 	pins := make(map[hal.Capability][]int)
-	for _, cap := range []hal.Capability{hal.DigitalOutput, hal.DigitalInput, hal.PWM, hal.AnalogInput} {
-		if v, ok := parameters[cap.String()]; ok {
-			val, ok := v.(string)
+	for _, c := range []hal.Capability{hal.DigitalOutput, hal.DigitalInput, hal.PWM, hal.AnalogInput} {
+		if v, ok := parameters[cap2string(c)]; ok {
+			val, ok := hal.ConvertToInt(v)
 			if !ok {
-				return nil, fmt.Errorf("failed to type cast '%s' parameter value '%v' as string", cap, v)
+				return nil, fmt.Errorf("failed to type cast '%s' parameter value '%v' as integer", c, v)
 			}
-			if val != "" {
-				sPins := strings.Split(val, ",")
-				for _, s := range sPins {
-					i, err := strconv.Atoi(s)
-					if err != nil {
-						return nil, fmt.Errorf("failed to convert '%s' pin '%v' to integrer. Error:%w", cap, s, err)
-					}
-					pins[cap] = append(pins[cap], i)
-				}
+			for i := 0; i < val; i++ {
+				pins[c] = append(pins[c], i)
 			}
 		}
 	}

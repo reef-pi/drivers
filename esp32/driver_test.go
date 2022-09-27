@@ -19,10 +19,10 @@ func TestESP32Driver(t *testing.T) {
 	f := FactoryWithClient(NopClient)
 	params := map[string]interface{}{
 		"Address":        "192.168.86.2",
-		"digital-output": "2,3",
-		"digital-input":  "1,4",
-		"analog-input":   "6,7",
-		"pwm":            "10",
+		"Digital-Output": 6,
+		"Digital-Input":  4,
+		"Pwm":            4,
+		"Analog-Input":   2,
 	}
 
 	d, err := f.NewDriver(params, nil)
@@ -37,8 +37,8 @@ func TestESP32Driver(t *testing.T) {
 	}
 	oPins := do.DigitalOutputPins()
 
-	if len(oPins) != 2 {
-		t.Error("expected 2 digital output pins, found:", len(oPins))
+	if len(oPins) != 6 {
+		t.Error("expected 6 digital output pins, found:", len(oPins))
 		return
 	}
 	if err := oPins[0].Write(true); err != nil {
@@ -51,8 +51,8 @@ func TestESP32Driver(t *testing.T) {
 	}
 	iPins := di.DigitalInputPins()
 
-	if len(iPins) != 2 {
-		t.Error("expected 2 digital input pins, found:", len(iPins))
+	if len(iPins) != 4 {
+		t.Error("expected 4 digital input pins, found:", len(iPins))
 		return
 	}
 	if _, err := iPins[0].Read(); err != nil {
@@ -65,8 +65,8 @@ func TestESP32Driver(t *testing.T) {
 		return
 	}
 	chs := pd.PWMChannels()
-	if len(chs) != 1 {
-		t.Error("expected 1 pwm pin found:", len(iPins))
+	if len(chs) != 4 {
+		t.Error("expected 4 pwm pin found:", len(chs))
 		return
 	}
 	if err := chs[0].Set(50); err != nil {
