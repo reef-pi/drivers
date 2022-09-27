@@ -106,10 +106,9 @@ func (f *factory) ValidateParameters(parameters map[string]interface{}) (bool, m
 	}
 	for _, c := range []hal.Capability{hal.DigitalOutput, hal.DigitalInput, hal.PWM, hal.AnalogInput} {
 		if v, ok := parameters[cap2string(c)]; ok {
-			val, ok := v.(int)
-
-			if !ok {
-				failure := fmt.Sprint(c, " is not an integer. ", parameters[cap2string(c)], " was received.")
+			val, converted := hal.ConvertToInt(v)
+			if !converted {
+				failure := fmt.Sprint(c, " is not an integer. ", parameters[cap2string(c)], " was received")
 				failures[cap2string(c)] = append(failures[cap2string(c)], failure)
 			}
 			if val <= 0 {
@@ -131,7 +130,7 @@ func (f *factory) NewDriver(parameters map[string]interface{}, hardwareResources
 	pins := make(map[hal.Capability][]int)
 	for _, c := range []hal.Capability{hal.DigitalOutput, hal.DigitalInput, hal.PWM, hal.AnalogInput} {
 		if v, ok := parameters[cap2string(c)]; ok {
-			val, ok := v.(int)
+			val, ok := hal.ConvertToInt(v)
 			if !ok {
 				return nil, fmt.Errorf("failed to type cast '%s' parameter value '%v' as integer", c, v)
 			}
