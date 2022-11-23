@@ -3,12 +3,13 @@ package esp32
 import (
 	"errors"
 	"fmt"
-	"github.com/reef-pi/hal"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/reef-pi/hal"
 )
 
 var _notImplemented = errors.New("not implemented")
@@ -22,6 +23,7 @@ type pin struct {
 	number  int
 	cap     hal.Capability
 	client  HTTPClient
+	state   bool
 }
 
 func (p *pin) Close() error {
@@ -61,10 +63,10 @@ func (p *pin) readBody(body io.ReadCloser) ([]byte, error) {
 }
 
 func (p *pin) LastState() bool {
-	return false
+	return p.state
 }
 
-func mapTo255String(f float64) int {
+func scaleTo255(f float64) int {
 	if f < 0 {
 		f = 0
 	}
@@ -83,7 +85,7 @@ func (p *pin) Set(v float64) error {
 		return p.incompatibleCapability()
 	}
 	baseUri := "http://%s/jacks/%d/%d"
-	uri := fmt.Sprintf(baseUri, p.address, p.number, mapTo255String(v))
+	uri := fmt.Sprintf(baseUri, p.address, p.number, scaleTo255(v))
 	resp, err := p.doRequest(http.MethodPost, uri, nil)
 	if err != nil {
 		return err
@@ -139,7 +141,8 @@ func (p *pin) Read() (bool, error) {
 	if resp.StatusCode != 200 {
 		return false, fmt.Errorf("HTTP Code:%d. Body:%v", resp.StatusCode, string(body))
 	}
-	return strings.ToLower(strings.TrimSpace(string(body))) == _true, nil
+	p.state = strings.ToLower(strings.TrimSpace(string(body))) == _true
+	return p.state, nil
 }
 
 func (p *pin) Value() (float64, error) {
