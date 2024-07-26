@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/reef-pi/hal"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"sync"
 	"time"
@@ -15,6 +14,7 @@ import (
 type httpDriver struct {
 	meta    hal.Metadata
 	address string
+	output  int
 }
 
 func (m *httpDriver) Close() error {
@@ -65,7 +65,7 @@ func (m *httpDriver) doRequest(url string) (*http.Response, error) {
 
 func (m *httpDriver) readBody(body io.ReadCloser) ([]byte, error) {
 	defer body.Close()
-	msg, err := ioutil.ReadAll(body)
+	msg, err := io.ReadAll(body)
 	if err != nil {
 		return nil, err
 	}
@@ -73,8 +73,8 @@ func (m *httpDriver) readBody(body io.ReadCloser) ([]byte, error) {
 }
 
 func (m *httpDriver) LastState() bool {
-	const urlBase = "http://%s/cm?cmnd=Power0"
-	uri := fmt.Sprintf(urlBase, m.address)
+	const urlBase = "http://%s/cm?cmnd=Power%d"
+	uri := fmt.Sprintf(urlBase, m.address, m.output)
 	resp, err := m.doRequest(uri)
 	if err != nil {
 		return false
@@ -91,9 +91,16 @@ func (m *httpDriver) LastState() bool {
 	if err != nil {
 		return false
 	}
-	const power = "POWER"
-	const on = "ON"
-	return result[power] == on
+
+	if result[fmt.Sprintf("POWER%d", m.output)] == "ON" {
+		return true
+	}
+
+	if result["POWER"] == "ON" {
+		return true
+	}
+
+	return false
 }
 
 func (m *httpDriver) Set(value float64) error {
@@ -114,8 +121,8 @@ func (m *httpDriver) Set(value float64) error {
 }
 
 func (m *httpDriver) Write(b bool) error {
-	const baseUri = "http://%s/cm?cmnd=Power0%%20%t"
-	uri := fmt.Sprintf(baseUri, m.address, b)
+	const baseUri = "http://%s/cm?cmnd=Power%d%%20%t"
+	uri := fmt.Sprintf(baseUri, m.address, m.output, b)
 	resp, err := m.doRequest(uri)
 	if err != nil {
 		return err
@@ -147,6 +154,7 @@ var pwmDriverFactory *factory
 var once sync.Once
 
 const address = "Address"
+const output = "Output"
 
 func HttpDriverFactory() hal.DriverFactory {
 
@@ -163,6 +171,12 @@ func HttpDriverFactory() hal.DriverFactory {
 					Type:    hal.String,
 					Order:   0,
 					Default: "192.1.168.4",
+				},
+				{
+					Name:    output,
+					Type:    hal.Integer,
+					Order:   1,
+					Default: 0,
 				},
 			},
 		}
@@ -195,6 +209,21 @@ func (f *factory) ValidateParameters(parameters map[string]interface{}) (bool, m
 		failures[address] = append(failures[address], failure)
 	}
 
+	if v, ok := parameters[output]; ok {
+		val, ok := v.(int)
+		if !ok {
+			failure := fmt.Sprint(output, " is not an integer. ", v, " was received.")
+			failures[output] = append(failures[output], failure)
+
+		} else if val < 0 {
+			failure := fmt.Sprint(output, " value should be greater than 0. ", val, " was received.")
+			failures[output] = append(failures[output], failure)
+		}
+	} else {
+		failure := fmt.Sprint(output, " is a required parameter, but was not received.")
+		failures[output] = append(failures[output], failure)
+	}
+
 	return len(failures) == 0, failures
 }
 
@@ -209,6 +238,7 @@ func (f *factory) NewDriver(parameters map[string]interface{}, hardwareResources
 	driver := &httpDriver{
 		meta:    f.meta,
 		address: parameters[address].(string),
+		output:  parameters[output].(int),
 	}
 	return driver, nil
 }
