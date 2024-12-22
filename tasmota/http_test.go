@@ -156,7 +156,6 @@ func TestHttpDriver_FactoryValidateParameters(t *testing.T) {
 
 	params := map[string]interface{}{
 		"Address": "192.168.1.46",
-		"Output":  0,
 	}
 
 	_, err := f.NewDriver(params, nil)

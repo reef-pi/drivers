@@ -232,6 +232,10 @@ func (f *factory) Metadata() hal.Metadata {
 }
 
 func (f *factory) NewDriver(parameters map[string]interface{}, hardwareResources interface{}) (hal.Driver, error) {
+	if parameters[output] == nil {
+		parameters[output] = 0
+	}
+
 	if valid, failures := f.ValidateParameters(parameters); !valid {
 		return nil, errors.New(hal.ToErrorString(failures))
 	}
