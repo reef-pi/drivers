@@ -7,6 +7,7 @@ import (
 	"github.com/reef-pi/hal"
 	"io"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -233,7 +234,13 @@ func (f *factory) Metadata() hal.Metadata {
 
 func (f *factory) NewDriver(parameters map[string]interface{}, hardwareResources interface{}) (hal.Driver, error) {
 	if parameters[output] == nil {
-		parameters[output] = 0
+		parameters[output] = "0"
+	}
+
+	if outputStr, ok := parameters[output].(string); ok {
+		if outputInt, err := strconv.Atoi(outputStr); err == nil {
+			parameters[output] = outputInt
+		}
 	}
 
 	if valid, failures := f.ValidateParameters(parameters); !valid {

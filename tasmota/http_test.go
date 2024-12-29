@@ -18,7 +18,7 @@ func TestHttpDriver_AsDigitalOut(t *testing.T) {
 
 	params := map[string]interface{}{
 		"Address": address,
-		"Output":  2,
+		"Output":  "2",
 	}
 
 	d, err := f.NewDriver(params, nil)
@@ -90,7 +90,7 @@ func TestHttpDriver_AsPWMDriver(t *testing.T) {
 
 	params := map[string]interface{}{
 		"Address": address,
-		"Output":  0,
+		"Output":  "0",
 	}
 
 	d, err := f.NewDriver(params, nil)
