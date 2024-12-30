@@ -112,7 +112,7 @@ func (f *factory) ValidateParameters(parameters map[string]interface{}) (bool, m
 				failures[cap2string(c)] = append(failures[cap2string(c)], failure)
 			}
 			if val < 0 {
-				failures[cap2string(c)] = append(failures[cap2string(c)], fmt.Sprint(c, " pin count should be above zero. Provided:%d", val))
+				failures[cap2string(c)] = append(failures[cap2string(c)], fmt.Sprint(c, " pin count should be zero or greater. Provided:%d", val))
 			}
 		}
 	}
