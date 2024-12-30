@@ -8,8 +8,8 @@ github.com/reef-pi/embd v0.0.0-20200823212911-23a8c07341dd/go.mod h1:vLR1mLVXpiv
 github.com/reef-pi/hal v0.0.0-20210801213209-e1fdd03d558f/go.mod h1:ymcJ0AbYfWXT1vyAbXOjKtWaFdCv1HHYmXDMWxJSWSM=
 github.com/reef-pi/hal v0.0.0-20220925063527-7d44144f7cf4 h1:D6j7tX1n97I6tnNfBGvVhe6X3KGn9EiBHqrDT+QQUhc=
 github.com/reef-pi/hal v0.0.0-20220925063527-7d44144f7cf4/go.mod h1:ymcJ0AbYfWXT1vyAbXOjKtWaFdCv1HHYmXDMWxJSWSM=
-github.com/reef-pi/rpi v0.0.0-20210801215232-95fff2a103fa h1:5E3TBLDtbk2YONg0xuBlFrE0+dBuwkoO9z2lp7EDmYs=
-github.com/reef-pi/rpi v0.0.0-20210801215232-95fff2a103fa/go.mod h1:5Zu8vYYKAJshaEh2WdVxsNXp1O6U6kTSvAMMAYmGjJQ=
+github.com/reef-pi/rpi v0.0.0-20220116071804-9ab406e54060 h1:CHoMp1LHrhQpc1j5yVw4UmnDEXbZ2CcWzKMrK8JT+OE=
+github.com/reef-pi/rpi v0.0.0-20220116071804-9ab406e54060/go.mod h1:5Zu8vYYKAJshaEh2WdVxsNXp1O6U6kTSvAMMAYmGjJQ=
 golang.org/x/exp v0.0.0-20190306152737-a1d7652674e8 h1:idBdZTd9UioThJp8KpM/rTSinK/ChZFBE43/WtIy8zg=
 golang.org/x/exp v0.0.0-20190306152737-a1d7652674e8/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/image v0.0.0-20190227222117-0694c2d4d067 h1:KYGJGHOQy8oSi1fDlSpcZF0+juKwk/hEMv5SiwHogR0=
