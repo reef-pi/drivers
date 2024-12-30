@@ -10,7 +10,7 @@ func TestHttpDriver_AsDigitalOut(t *testing.T) {
 
 	address := os.Getenv("TASMOTA_TEST_ADDRESS")
 
-	if 	len(address) == 0 {
+	if len(address) == 0 {
 		address = "192.168.1.46"
 	}
 
@@ -18,6 +18,7 @@ func TestHttpDriver_AsDigitalOut(t *testing.T) {
 
 	params := map[string]interface{}{
 		"Address": address,
+		"Output":  "2",
 	}
 
 	d, err := f.NewDriver(params, nil)
@@ -81,7 +82,7 @@ func TestHttpDriver_AsPWMDriver(t *testing.T) {
 
 	address := os.Getenv("TASMOTA_TEST_ADDRESS")
 
-	if 	len(address) == 0 {
+	if len(address) == 0 {
 		address = "192.168.1.46"
 	}
 
@@ -89,6 +90,7 @@ func TestHttpDriver_AsPWMDriver(t *testing.T) {
 
 	params := map[string]interface{}{
 		"Address": address,
+		"Output":  "0",
 	}
 
 	d, err := f.NewDriver(params, nil)
