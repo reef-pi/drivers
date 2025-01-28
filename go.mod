@@ -5,8 +5,8 @@ go 1.23.2
 require (
 	github.com/hajimehoshi/go-mp3 v0.3.4
 	github.com/hajimehoshi/oto v1.0.1
-	github.com/reef-pi/hal v0.0.0-20220925063527-7d44144f7cf4
-	github.com/reef-pi/rpi v0.0.0-20241230064402-2f81f2d7491a
+	github.com/reef-pi/hal v0.0.0-20241230081938-0bb4bbd0e03a
+	github.com/reef-pi/rpi v0.0.0-20250128071619-614c4ae80b22
 )
 
 require (
