@@ -31,7 +31,7 @@ are not stable, and subjected to change as per reef-pi's requirement.
 
 ## License
 
-Copyright:: Copyright (c) 2021 Ranjib Dey.
+Copyright:: Copyright (c) 2025 Ranjib Dey.
 License:: Apache License, Version 2.0
 
 Licensed under the Apache License, Version 2.0 (the "License");
