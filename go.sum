@@ -1,7 +1,7 @@
 github.com/hajimehoshi/go-mp3 v0.3.4 h1:NUP7pBYH8OguP4diaTZ9wJbUbk3tC0KlfzsEpWmYj68=
 github.com/hajimehoshi/go-mp3 v0.3.4/go.mod h1:fRtZraRFcWb0pu7ok0LqyFhCUrPeMsGRSVop0eemFmo=
-github.com/hajimehoshi/oto v1.0.1 h1:8AMnq0Yr2YmzaiqTg/k1Yzd6IygUGk2we9nmjgbgPn4=
-github.com/hajimehoshi/oto v1.0.1/go.mod h1:wovJ8WWMfFKvP587mhHgot/MBr4DnNy9m6EepeVGnos=
+github.com/hajimehoshi/oto v1.0.2 h1:NxUZoQkV4UgbJobPIT/pVTcT/qpkd3YqEGRzPtk7Rc8=
+github.com/hajimehoshi/oto v1.0.2/go.mod h1:AARGdOaQIhMJ1fhKu7nMzEesM2/mE4KZ8A1K1VZozuQ=
 github.com/hajimehoshi/oto/v2 v2.3.1/go.mod h1:seWLbgHH7AyUMYKfKYT9pg7PhUu9/SisyJvNTT+ASQo=
 github.com/reef-pi/hal v0.0.0-20241230081938-0bb4bbd0e03a h1:I4MRPsobJgpj1LaJ28Ren+++FrrwnGQ+/HRK9FSc9ic=
 github.com/reef-pi/hal v0.0.0-20241230081938-0bb4bbd0e03a/go.mod h1:ymcJ0AbYfWXT1vyAbXOjKtWaFdCv1HHYmXDMWxJSWSM=
