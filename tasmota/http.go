@@ -7,15 +7,114 @@ import (
 	"github.com/reef-pi/hal"
 	"io"
 	"net/http"
+	"sort"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
 
+// parseOutputs parses an output configuration string and returns a sorted slice of output numbers.
+// Supported formats:
+// - "1" -> [1]
+// - "1,2,3" -> [1, 2, 3]
+// - "1-3" -> [1, 2, 3]
+// - "1-3,5,7-9" -> [1, 2, 3, 5, 7, 8, 9]
+// Returns error for invalid formats, negative numbers, duplicates, or reversed ranges.
+func parseOutputs(config string) ([]int, error) {
+	if config == "" {
+		return nil, errors.New("output configuration cannot be empty")
+	}
+
+	outputMap := make(map[int]bool)
+	var outputs []int
+
+	// Split by comma
+	parts := strings.Split(config, ",")
+
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+
+		if strings.Contains(part, "-") {
+			// Handle range format (e.g., "1-3")
+			rangeParts := strings.Split(part, "-")
+			if len(rangeParts) != 2 {
+				return nil, fmt.Errorf("invalid range format: %s", part)
+			}
+
+			start, err := strconv.Atoi(strings.TrimSpace(rangeParts[0]))
+			if err != nil {
+				return nil, fmt.Errorf("invalid start number in range '%s': %v", part, err)
+			}
+
+			end, err := strconv.Atoi(strings.TrimSpace(rangeParts[1]))
+			if err != nil {
+				return nil, fmt.Errorf("invalid end number in range '%s': %v", part, err)
+			}
+
+			if start < 0 || end < 0 {
+				return nil, fmt.Errorf("output numbers must be non-negative, got range '%s'", part)
+			}
+
+			if start > end {
+				return nil, fmt.Errorf("invalid range '%s': start (%d) is greater than end (%d)", part, start, end)
+			}
+
+			for i := start; i <= end; i++ {
+				if outputMap[i] {
+					return nil, fmt.Errorf("duplicate output number: %d", i)
+				}
+				outputMap[i] = true
+				outputs = append(outputs, i)
+			}
+		} else {
+			// Handle single number format
+			num, err := strconv.Atoi(part)
+			if err != nil {
+				return nil, fmt.Errorf("invalid output number '%s': %v", part, err)
+			}
+
+			if num < 0 {
+				return nil, fmt.Errorf("output numbers must be non-negative, got %d", num)
+			}
+
+			if outputMap[num] {
+				return nil, fmt.Errorf("duplicate output number: %d", num)
+			}
+
+			outputMap[num] = true
+			outputs = append(outputs, num)
+		}
+	}
+
+	if len(outputs) == 0 {
+		return nil, errors.New("no valid output numbers found")
+	}
+
+	// Sort outputs for consistent ordering
+	sort.Ints(outputs)
+
+	return outputs, nil
+}
+
 type httpDriver struct {
-	meta    hal.Metadata
-	address string
-	output  int
+	meta     hal.Metadata
+	address  string
+	outputs  []int
+	pins     []hal.DigitalOutputPin
+	channels []hal.PWMChannel
+}
+
+// pinDriver represents a digital output pin on a Tasmota device
+type pinDriver struct {
+	driver *httpDriver
+	number int
+}
+
+// channelDriver represents a PWM channel on a Tasmota device
+type channelDriver struct {
+	driver *httpDriver
+	number int
 }
 
 func (m *httpDriver) Close() error {
@@ -46,11 +145,14 @@ func (m *httpDriver) Pins(capability hal.Capability) ([]hal.Pin, error) {
 }
 
 func (m *httpDriver) PWMChannels() []hal.PWMChannel {
-	return []hal.PWMChannel{m}
+	return m.channels
 }
 
-func (m *httpDriver) PWMChannel(_ int) (hal.PWMChannel, error) {
-	return m, nil
+func (m *httpDriver) PWMChannel(index int) (hal.PWMChannel, error) {
+	if index < 0 || index >= len(m.channels) {
+		return nil, fmt.Errorf("PWM channel index %d out of range (0-%d)", index, len(m.channels)-1)
+	}
+	return m.channels[index], nil
 }
 
 func (m *httpDriver) doRequest(url string) (*http.Response, error) {
@@ -73,17 +175,60 @@ func (m *httpDriver) readBody(body io.ReadCloser) ([]byte, error) {
 	return msg, nil
 }
 
-func (m *httpDriver) LastState() bool {
+
+func (m *httpDriver) DigitalOutputPins() []hal.DigitalOutputPin {
+	return m.pins
+}
+
+func (m *httpDriver) DigitalOutputPin(index int) (hal.DigitalOutputPin, error) {
+	if index < 0 || index >= len(m.pins) {
+		return nil, fmt.Errorf("digital output pin index %d out of range (0-%d)", index, len(m.pins)-1)
+	}
+	return m.pins[index], nil
+}
+
+// pinDriver methods
+
+func (p *pinDriver) Close() error {
+	return nil
+}
+
+func (p *pinDriver) Name() string {
+	return "Tasmota"
+}
+
+func (p *pinDriver) Number() int {
+	return 0
+}
+
+func (p *pinDriver) Write(b bool) error {
+	const baseUri = "http://%s/cm?cmnd=Power%d%%20%t"
+	uri := fmt.Sprintf(baseUri, p.driver.address, p.number, b)
+	resp, err := p.driver.doRequest(uri)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode == 200 {
+		return nil
+	}
+	body, err := p.driver.readBody(resp.Body)
+	if err != nil {
+		return err
+	}
+	return fmt.Errorf("HTTP Code:%d. Body:%v", resp.StatusCode, string(body))
+}
+
+func (p *pinDriver) LastState() bool {
 	const urlBase = "http://%s/cm?cmnd=Power%d"
-	uri := fmt.Sprintf(urlBase, m.address, m.output)
-	resp, err := m.doRequest(uri)
+	uri := fmt.Sprintf(urlBase, p.driver.address, p.number)
+	resp, err := p.driver.doRequest(uri)
 	if err != nil {
 		return false
 	}
 	if resp.StatusCode != 200 {
 		return false
 	}
-	body, err := m.readBody(resp.Body)
+	body, err := p.driver.readBody(resp.Body)
 	if err != nil {
 		return false
 	}
@@ -93,7 +238,7 @@ func (m *httpDriver) LastState() bool {
 		return false
 	}
 
-	if result[fmt.Sprintf("POWER%d", m.output)] == "ON" {
+	if result[fmt.Sprintf("POWER%d", p.number)] == "ON" {
 		return true
 	}
 
@@ -104,46 +249,83 @@ func (m *httpDriver) LastState() bool {
 	return false
 }
 
-func (m *httpDriver) Set(value float64) error {
+// channelDriver methods
+
+func (c *channelDriver) Close() error {
+	return nil
+}
+
+func (c *channelDriver) Name() string {
+	return "Tasmota"
+}
+
+func (c *channelDriver) Number() int {
+	return 0
+}
+
+func (c *channelDriver) Set(value float64) error {
 	const urlBase = "http://%s/cm?cmnd=Dimmer%%20%.0f"
-	uri := fmt.Sprintf(urlBase, m.address, value)
-	resp, err := m.doRequest(uri)
+	uri := fmt.Sprintf(urlBase, c.driver.address, value)
+	resp, err := c.driver.doRequest(uri)
 	if err != nil {
 		return err
 	}
 	if resp.StatusCode == 200 {
 		return nil
 	}
-	body, err := m.readBody(resp.Body)
+	body, err := c.driver.readBody(resp.Body)
 	if err != nil {
 		return err
 	}
 	return fmt.Errorf("HTTP Code:%d. Body:%v", resp.StatusCode, string(body))
 }
 
-func (m *httpDriver) Write(b bool) error {
+func (c *channelDriver) Write(b bool) error {
 	const baseUri = "http://%s/cm?cmnd=Power%d%%20%t"
-	uri := fmt.Sprintf(baseUri, m.address, m.output, b)
-	resp, err := m.doRequest(uri)
+	uri := fmt.Sprintf(baseUri, c.driver.address, c.number, b)
+	resp, err := c.driver.doRequest(uri)
 	if err != nil {
 		return err
 	}
 	if resp.StatusCode == 200 {
 		return nil
 	}
-	body, err := m.readBody(resp.Body)
+	body, err := c.driver.readBody(resp.Body)
 	if err != nil {
 		return err
 	}
 	return fmt.Errorf("HTTP Code:%d. Body:%v", resp.StatusCode, string(body))
 }
 
-func (m *httpDriver) DigitalOutputPins() []hal.DigitalOutputPin {
-	return []hal.DigitalOutputPin{m}
-}
+func (c *channelDriver) LastState() bool {
+	const urlBase = "http://%s/cm?cmnd=Power%d"
+	uri := fmt.Sprintf(urlBase, c.driver.address, c.number)
+	resp, err := c.driver.doRequest(uri)
+	if err != nil {
+		return false
+	}
+	if resp.StatusCode != 200 {
+		return false
+	}
+	body, err := c.driver.readBody(resp.Body)
+	if err != nil {
+		return false
+	}
+	var result map[string]interface{}
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return false
+	}
 
-func (m *httpDriver) DigitalOutputPin(_ int) (hal.DigitalOutputPin, error) {
-	return m, nil
+	if result[fmt.Sprintf("POWER%d", c.number)] == "ON" {
+		return true
+	}
+
+	if result["POWER"] == "ON" {
+		return true
+	}
+
+	return false
 }
 
 type factory struct {
@@ -211,14 +393,25 @@ func (f *factory) ValidateParameters(parameters map[string]interface{}) (bool, m
 	}
 
 	if v, ok := parameters[output]; ok {
-		val, ok := v.(int)
-		if !ok {
-			failure := fmt.Sprint(output, " is not an integer. ", v, " was received.")
+		// Accept both string and integer for backward compatibility
+		var outputConfig string
+		switch val := v.(type) {
+		case string:
+			outputConfig = val
+		case int:
+			outputConfig = strconv.Itoa(val)
+		default:
+			failure := fmt.Sprint(output, " must be string or integer. ", v, " was received.")
 			failures[output] = append(failures[output], failure)
+		}
 
-		} else if val < 0 {
-			failure := fmt.Sprint(output, " value should be greater than 0. ", val, " was received.")
-			failures[output] = append(failures[output], failure)
+		if len(outputConfig) > 0 {
+			// Validate the output configuration
+			_, err := parseOutputs(outputConfig)
+			if err != nil {
+				failure := fmt.Sprint(output, " configuration is invalid: ", err.Error())
+				failures[output] = append(failures[output], failure)
+			}
 		}
 	} else {
 		failure := fmt.Sprint(output, " is a required parameter, but was not received.")
@@ -234,22 +427,50 @@ func (f *factory) Metadata() hal.Metadata {
 
 func (f *factory) NewDriver(parameters map[string]interface{}, hardwareResources interface{}) (hal.Driver, error) {
 	if parameters[output] == nil {
-		parameters[output] = "0"
+		parameters[output] = "1"
 	}
 
-	if outputStr, ok := parameters[output].(string); ok {
-		if outputInt, err := strconv.Atoi(outputStr); err == nil {
-			parameters[output] = outputInt
-		}
+	// Convert output to string for consistent processing
+	var outputStr string
+	if outputInt, ok := parameters[output].(int); ok {
+		outputStr = strconv.Itoa(outputInt)
+	} else if str, ok := parameters[output].(string); ok {
+		outputStr = str
+	} else {
+		return nil, fmt.Errorf("output must be int or string, got %T", parameters[output])
 	}
+	parameters[output] = outputStr
 
 	if valid, failures := f.ValidateParameters(parameters); !valid {
 		return nil, errors.New(hal.ToErrorString(failures))
 	}
-	driver := &httpDriver{
-		meta:    f.meta,
-		address: parameters[address].(string),
-		output:  parameters[output].(int),
+
+	// Parse output configuration
+	outputs, err := parseOutputs(outputStr)
+	if err != nil {
+		return nil, fmt.Errorf("invalid output configuration: %v", err)
 	}
+
+	// Create driver
+	driver := &httpDriver{
+		meta:     f.meta,
+		address:  parameters[address].(string),
+		outputs:  outputs,
+		pins:     []hal.DigitalOutputPin{},
+		channels: []hal.PWMChannel{},
+	}
+
+	// Create pin and channel objects for each output
+	for _, outNum := range outputs {
+		driver.pins = append(driver.pins, &pinDriver{
+			driver: driver,
+			number: outNum,
+		})
+		driver.channels = append(driver.channels, &channelDriver{
+			driver: driver,
+			number: outNum,
+		})
+	}
+
 	return driver, nil
 }
