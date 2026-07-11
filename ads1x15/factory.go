@@ -106,12 +106,12 @@ func parseGain(v interface{}) (string, error) {
 
 	if !ok {
 		failure := fmt.Sprint(" is not a string. ", v, " was received.")
-		return "", fmt.Errorf(failure)
+		return "", fmt.Errorf("%s", failure)
 	}
 
 	if _, ok = gainOptions[val.(string)]; !ok {
 		failure := fmt.Sprint(" is not a valid value of 2/3, 1, 2, 4, 8, or 16. ", v, " was received.")
-		return "", fmt.Errorf(failure)
+		return "", fmt.Errorf("%s", failure)
 	}
 
 	return val.(string), nil
