@@ -112,7 +112,10 @@ func (p *pca9685Driver) set(pin int, value float64) error {
 	case value == 100:
 		return p.hwDriver.SetPwm(pin, 4096, 0)
 	default:
-		return p.hwDriver.SetPwm(pin, 0, uint16(value*40.95))
+		on := uint16(pin * 256)
+		width := uint16(value * 40.95)
+		off := uint16((on + width) % 4096)
+		return p.hwDriver.SetPwm(pin, on, off)
 	}
 }
 
